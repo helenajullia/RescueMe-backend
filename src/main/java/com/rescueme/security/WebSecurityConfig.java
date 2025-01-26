@@ -26,13 +26,15 @@ public class WebSecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors().and()
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/users/**").permitAll()
                         .requestMatchers("/api/v1/auth/register/**").permitAll()
                         .requestMatchers("/api/v1/auth/login").permitAll()
-                        .requestMatchers("/users/all").permitAll()
                         .requestMatchers("/api/v1/auth/check-email").permitAll()
+                        .requestMatchers("/api/v1/auth/check-username").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
         return http.build();
     }
 }
