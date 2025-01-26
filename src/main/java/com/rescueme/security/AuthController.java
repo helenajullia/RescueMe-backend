@@ -42,4 +42,13 @@ public class AuthController {
         LoginResponse loginResponse = authService.login(loginRequest);
         return ResponseEntity.ok(loginResponse);
     }
+
+    @GetMapping("/check-email")
+    public ResponseEntity<Map<String, Object>> checkEmailExists(@RequestParam String email) {
+        boolean exists = userService.emailExists(email);
+        Map<String, Object> response = new HashMap<>();
+        response.put("emailExists", exists);
+        return ResponseEntity.ok(response);
+    }
+
 }
