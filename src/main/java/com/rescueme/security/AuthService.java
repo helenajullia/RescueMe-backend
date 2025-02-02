@@ -23,13 +23,13 @@ public class AuthService {
         User user = userRepository.findByEmail(loginRequest.getEmail())
                 .orElseThrow(() -> new IncorrectCredentialsException("Incorrect credentials"));
 
-
         if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
             throw new IncorrectCredentialsException("Incorrect credentials");
         }
 
         String token = jwtUtil.generateToken(user);
 
-        return new LoginResponse(token, user.getRole().toString());
+        return new LoginResponse(token, user.getRole().toString(), user.getUsername());
     }
+
 }
