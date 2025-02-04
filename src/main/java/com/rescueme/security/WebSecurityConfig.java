@@ -27,6 +27,7 @@ public class WebSecurityConfig {
                 .cors().and()
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/users/**").permitAll()
+                        .requestMatchers("/pets/**").permitAll()
                         .requestMatchers("/api/v1/auth/register/**").permitAll()
                         .requestMatchers("/api/v1/auth/login").permitAll()
                         .requestMatchers("/api/v1/auth/check-email").permitAll()
