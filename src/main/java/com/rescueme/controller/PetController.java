@@ -25,7 +25,6 @@ public class PetController {
     @PostMapping("/add")
     public ResponseEntity<Pet> addPet(@RequestBody Pet pet, @RequestHeader("shelterId") Long shelterId) {
         User shelter = userService.getUserById(shelterId);
-
         Pet savedPet = petService.addPet(pet, shelter);
         return ResponseEntity.ok(savedPet);
     }
