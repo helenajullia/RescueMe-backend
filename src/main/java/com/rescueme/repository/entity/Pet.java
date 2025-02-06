@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -23,7 +24,7 @@ public class Pet {
     private String species;
     private String breed;
     private String sex;
-    private int age;
+    private double age;
     private String size;
     private String healthStatus;
     private boolean vaccinated;
@@ -32,14 +33,15 @@ public class Pet {
     private boolean urgentAdoptionNeeded;
     private String timeSpentInShelter;
 
+    @ElementCollection
+    private List<String> photoUrls = new ArrayList<>();
+
     @Enumerated(EnumType.STRING)
     private PetStatus status;
 
     @Column(name = "story", columnDefinition = "TEXT")
     private String story;
 
-    @ElementCollection
-    private List<String> photos;
 
     private LocalDate createdAt;
 
@@ -51,4 +53,7 @@ public class Pet {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User shelter;
+
+
+
 }

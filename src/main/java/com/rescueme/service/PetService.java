@@ -14,7 +14,8 @@ public interface PetService {
 
     Pet getPetById(Long id);
 
-    Pet updatePet(Long id, Pet petDetails);
+    void updatePet(Long petId, List<String> photoUrls);
+
 
     void deletePet(Long id);
 

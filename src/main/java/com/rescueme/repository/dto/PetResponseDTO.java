@@ -14,7 +14,7 @@ public class PetResponseDTO {
         private String species;
         private String breed;
         private String sex;
-        private int age;
+        private double age;
         private String size;
         private String healthStatus;
         private boolean vaccinated;
@@ -23,31 +23,9 @@ public class PetResponseDTO {
         private String timeSpentInShelter;
         private String status;
         private String story;
-        private List<String> photos;
+        private List<String> photoUrls;
         private LocalDate createdAt;
         private Long shelterId;
         private String shelterUsername;
 
-        // Constructor that accepts a Pet entity
-//        public PetResponseDTO(Pet pet) {
-//                this.id = pet.getId();
-//                this.name = pet.getName();
-//                this.species = pet.getSpecies();
-//                this.breed = pet.getBreed();
-//                this.sex = pet.getSex();
-//                this.age = pet.getAge();
-//                this.size = pet.getSize();
-//                this.healthStatus = pet.getHealthStatus();
-//                this.vaccinated = pet.isVaccinated();
-//                this.neutered = pet.isNeutered();
-//                this.urgentAdoptionNeeded = pet.isUrgentAdoptionNeeded();
-//                this.timeSpentInShelter = pet.getTimeSpentInShelter();
-//                // Handle null status here
-//                this.status = pet.getStatus() != null ? pet.getStatus().name() : "UNKNOWN";
-//                this.story = pet.getStory();
-//                this.photos = pet.getPhotos();
-//                this.createdAt = pet.getCreatedAt();
-//                this.shelterId = pet.getShelter().getId();
-//                this.shelterUsername = pet.getShelter().getUsername();
-//        }
 }

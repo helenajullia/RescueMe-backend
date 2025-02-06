@@ -4,6 +4,7 @@ import com.rescueme.repository.PetRepository;
 import com.rescueme.repository.entity.Pet;
 import com.rescueme.repository.entity.User;
 import com.rescueme.service.PetService;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import com.rescueme.repository.dto.PetResponseDTO;
 
@@ -37,7 +38,13 @@ public class PetServiceImpl implements PetService {
     }
 
     @Override
-    public Pet updatePet(Long id, Pet petDetails) {return null;}
+    public void updatePet(Long petId, List<String> photoUrls) {
+        Pet pet = petRepository.findById(petId)
+                .orElseThrow(() -> new EntityNotFoundException("Pet not found"));
+        pet.setPhotoUrls(photoUrls);
+        petRepository.save(pet);
+    }
+
 
     @Override
     public void deletePet(Long id) {}
@@ -60,7 +67,7 @@ public class PetServiceImpl implements PetService {
                         pet.getTimeSpentInShelter(),
                         pet.getStatus().name(),
                         pet.getStory(),
-                        pet.getPhotos(),
+                        pet.getPhotoUrls(),
                         pet.getCreatedAt(),
                         pet.getShelter().getId(),
                         pet.getShelter().getUsername()
