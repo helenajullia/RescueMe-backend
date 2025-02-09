@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import com.rescueme.repository.dto.PetResponseDTO;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -20,6 +21,7 @@ public class PetServiceImpl implements PetService {
         this.petRepository = petRepository;
     }
 
+    @Override
     public Pet addPet(Pet pet, User shelter) {
         pet.setShelter(shelter);
         System.out.println("Description before saving: " + pet.getStory());
@@ -45,9 +47,21 @@ public class PetServiceImpl implements PetService {
         petRepository.save(pet);
     }
 
-
     @Override
-    public void deletePet(Long id) {}
+    public boolean deletePetByShelterId(Long shelterId, Long petId) {
+        Optional<Pet> optionalPet = petRepository.findById(petId);
+
+        if (optionalPet.isPresent()) {
+            Pet pet = optionalPet.get();
+            if (pet.getShelter().getId().equals(shelterId)) {
+                petRepository.deleteById(petId);
+                return true;
+            }
+        }
+        return false;
+    }
+
+
 
     @Override
     public List<PetResponseDTO> getPetsByShelterId(Long shelterId) {

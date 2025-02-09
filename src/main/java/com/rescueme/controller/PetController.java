@@ -76,4 +76,15 @@ public class PetController {
         return ResponseEntity.ok(pets);
     }
 
+
+    @DeleteMapping("/{shelterId}/delete/{petId}")
+    public ResponseEntity<String> deletePet(@PathVariable Long shelterId, @PathVariable Long petId) {
+        if (petService.deletePetByShelterId(shelterId, petId)) {
+            return ResponseEntity.ok("Pet deleted successfully");
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not authorized to delete this pet or pet not found");
+        }
+    }
+
+
 }

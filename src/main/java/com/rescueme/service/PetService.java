@@ -16,8 +16,7 @@ public interface PetService {
 
     void updatePet(Long petId, List<String> photoUrls);
 
-
-    void deletePet(Long id);
+    public boolean deletePetByShelterId(Long shelterId, Long petId);
 
     public List<PetResponseDTO> getPetsByShelterId(Long shelterId);
 }
