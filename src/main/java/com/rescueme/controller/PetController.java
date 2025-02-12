@@ -5,7 +5,6 @@ import com.rescueme.repository.dto.PetResponseDTO;
 import com.rescueme.repository.entity.Pet;
 import com.rescueme.repository.entity.User;
 import com.rescueme.service.PetService;
-import com.rescueme.service.PhotoService;
 import com.rescueme.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -22,26 +21,16 @@ public class PetController {
     private final PetService petService;
     private final UserService userService;
 
-    private final PhotoService photoService;
-
-    public PetController(PetService petService, UserService userService, PhotoService photoService) {
+    public PetController(PetService petService, UserService userService) {
         this.petService = petService;
         this.userService = userService;
-        this.photoService=photoService;
 
     }
 
-//    @PostMapping("/add")
-//    public ResponseEntity<Pet> addPet(@RequestBody Pet pet, @RequestHeader("shelterId") Long shelterId) {
-//        User shelter = userService.getUserById(shelterId);
-//        Pet savedPet = petService.addPet(pet, shelter);
-//        return ResponseEntity.ok(savedPet);
-//    }
-
     @PostMapping(value = "/add", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Pet> addPet(
+    public ResponseEntity<PetResponseDTO> addPet(
             @RequestPart("petData") String petDataString,
-            @RequestPart("photos") List<MultipartFile> photos,
+            @RequestPart(value = "photos", required = false) List<MultipartFile> photos,
             @RequestHeader("shelterId") Long shelterId
     ) {
         try {
@@ -49,22 +38,10 @@ public class PetController {
             Pet petData = objectMapper.readValue(petDataString, Pet.class);
 
             User shelter = userService.getUserById(shelterId);
-            petData.setShelter(shelter);
+            Pet savedPet = petService.addPet(petData, shelter, photos);
 
-            Pet savedPet = petService.addPet(petData, shelter);
-
-            List<String> photoUrls = photoService.processPhotos(photos, savedPet.getId());
-            savedPet.setPhotoUrls(photoUrls);
-
-            petService.updatePet(savedPet.getId(), photoUrls);
-
-//            System.out.println("Pet data: " + petData);
-//            System.out.println("Photos received: " + photos.size());
-//            System.out.println("Photo URLs: " + photoUrls);
-
-            return ResponseEntity.ok(savedPet);
+            return ResponseEntity.ok(PetResponseDTO.toDto(savedPet));
         } catch (Exception e) {
-            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }

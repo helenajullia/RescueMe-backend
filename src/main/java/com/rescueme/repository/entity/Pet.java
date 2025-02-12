@@ -29,12 +29,9 @@ public class Pet {
     private String healthStatus;
     private boolean vaccinated;
     private boolean neutered;
-
     private boolean urgentAdoptionNeeded;
     private String timeSpentInShelter;
-
-    @ElementCollection
-    private List<String> photoUrls = new ArrayList<>();
+    private LocalDate createdAt;
 
     @Enumerated(EnumType.STRING)
     private PetStatus status;
@@ -42,8 +39,8 @@ public class Pet {
     @Column(name = "story", columnDefinition = "TEXT")
     private String story;
 
-
-    private LocalDate createdAt;
+    @OneToMany(mappedBy = "pet", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<PetPhoto> photos;
 
     @PrePersist
     public void prePersist() {
@@ -53,7 +50,5 @@ public class Pet {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User shelter;
-
-
 
 }
