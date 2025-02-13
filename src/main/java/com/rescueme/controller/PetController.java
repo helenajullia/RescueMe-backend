@@ -63,5 +63,27 @@ public class PetController {
         }
     }
 
+    @PutMapping(value = "/update/{petId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> updatePet(
+            @PathVariable Long petId,
+            @RequestPart(value = "petData", required = false) String petDataString,
+            @RequestPart(value = "photos", required = false) List<MultipartFile> photos,
+            @RequestParam(value = "deleteExistingPhotos", required = false, defaultValue = "false") boolean deleteExistingPhotos,
+            @RequestHeader("shelterId") Long shelterId
+    ) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            Pet updatedPetData = petDataString != null ? objectMapper.readValue(petDataString, Pet.class) : new Pet();
+
+            Pet updatedPet = petService.updatePet(petId, updatedPetData, shelterId, photos, deleteExistingPhotos);
+
+            return ResponseEntity.ok(PetResponseDTO.toDto(updatedPet));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error updating pet: " + e.getMessage());
+        }
+    }
+
 
 }
