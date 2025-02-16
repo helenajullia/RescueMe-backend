@@ -90,4 +90,11 @@ public class PetController {
     public PetStatsDTO getPetStats() {
         return petService.getPetStats();
     }
+
+    @GetMapping("/stats/{shelterId}")
+    public ResponseEntity<PetStatsDTO> getPetStatsByShelter(@PathVariable Long shelterId) {
+        PetStatsDTO stats = petService.getPetStatsByShelter(shelterId);
+        return ResponseEntity.ok(stats);
+    }
+
 }

@@ -21,5 +21,8 @@ public interface PetService {
     public boolean deletePetByShelterId(Long shelterId, Long petId);
 
     public List<PetResponseDTO> getPetsByShelterId(Long shelterId);
+
     PetStatsDTO getPetStats();
+
+    PetStatsDTO getPetStatsByShelter(Long shelterId);
 }

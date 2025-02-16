@@ -117,4 +117,14 @@ public class PetServiceImpl implements PetService {
         return new PetStatsDTO(adoptedCount, pendingCount, availableCount);
     }
 
+
+    @Override
+    public PetStatsDTO getPetStatsByShelter(Long shelterId) {
+        int adoptedCount = petRepository.countByShelterIdAndStatus(shelterId, PetStatus.ADOPTED);
+        int pendingCount = petRepository.countByShelterIdAndStatus(shelterId, PetStatus.PENDING);
+        int availableCount = petRepository.countByShelterIdAndStatus(shelterId, PetStatus.AVAILABLE);
+
+        return new PetStatsDTO(adoptedCount, pendingCount, availableCount, shelterId);
+    }
+
 }

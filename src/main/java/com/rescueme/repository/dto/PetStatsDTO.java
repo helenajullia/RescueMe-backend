@@ -1,25 +1,25 @@
 package com.rescueme.repository.dto;
 
+import lombok.Data;
+
+@Data
 public class PetStatsDTO {
     private int adopted;
     private int pending;
     private int available;
+    private Long shelterId;
 
-    public PetStatsDTO(int adopted, int pending, int available) { // Numele constructorului trebuie să fie identic cu numele clasei
+    public PetStatsDTO(int adopted, int pending, int available) {
         this.adopted = adopted;
         this.pending = pending;
         this.available = available;
     }
 
-    public int getAdopted() {
-        return adopted;
+    public PetStatsDTO(int adopted, int pending, int available, Long shelterId) {
+        this.adopted = adopted;
+        this.pending = pending;
+        this.available = available;
+        this.shelterId = shelterId;
     }
 
-    public int getPending() {
-        return pending;
-    }
-
-    public int getAvailable() {
-        return available;
-    }
 }
