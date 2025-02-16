@@ -1,6 +1,7 @@
 package com.rescueme.repository;
 
 import com.rescueme.repository.entity.Pet;
+import com.rescueme.repository.entity.PetStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -10,6 +11,8 @@ import java.util.List;
 
 @Repository
 public interface PetRepository extends JpaRepository<Pet, Long> {
+
+    int countByStatus(PetStatus petStatus);
 
     List<Pet> findByShelterId(Long shelterId);
 

@@ -1,6 +1,7 @@
 package com.rescueme.service;
 
 import com.rescueme.repository.dto.PetResponseDTO;
+import com.rescueme.repository.dto.PetStatsDTO;
 import com.rescueme.repository.entity.Pet;
 import com.rescueme.repository.entity.User;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,4 +21,5 @@ public interface PetService {
     public boolean deletePetByShelterId(Long shelterId, Long petId);
 
     public List<PetResponseDTO> getPetsByShelterId(Long shelterId);
+    PetStatsDTO getPetStats();
 }

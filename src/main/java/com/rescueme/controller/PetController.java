@@ -2,6 +2,7 @@ package com.rescueme.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rescueme.repository.dto.PetResponseDTO;
+import com.rescueme.repository.dto.PetStatsDTO;
 import com.rescueme.repository.entity.Pet;
 import com.rescueme.repository.entity.User;
 import com.rescueme.service.PetService;
@@ -85,5 +86,8 @@ public class PetController {
         }
     }
 
-
+    @GetMapping("/stats")
+    public PetStatsDTO getPetStats() {
+        return petService.getPetStats();
+    }
 }

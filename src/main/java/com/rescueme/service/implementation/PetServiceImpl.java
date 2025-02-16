@@ -1,9 +1,8 @@
 package com.rescueme.service.implementation;
 
-import com.rescueme.repository.PetPhotoRepository;
 import com.rescueme.repository.PetRepository;
 import com.rescueme.repository.entity.Pet;
-import com.rescueme.repository.entity.PetPhoto;
+import com.rescueme.repository.entity.PetStatus;
 import com.rescueme.repository.entity.User;
 import com.rescueme.service.PetPhotoService;
 import com.rescueme.service.PetService;
@@ -12,8 +11,8 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import com.rescueme.repository.dto.PetResponseDTO;
 import org.springframework.web.multipart.MultipartFile;
+import com.rescueme.repository.dto.PetStatsDTO;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -107,6 +106,15 @@ public class PetServiceImpl implements PetService {
         }
 
         return petRepository.save(existingPet);
+    }
+
+    @Override
+    public PetStatsDTO getPetStats() {
+        int adoptedCount = petRepository.countByStatus(PetStatus.ADOPTED);
+        int pendingCount = petRepository.countByStatus(PetStatus.PENDING);
+        int availableCount = petRepository.countByStatus(PetStatus.AVAILABLE);
+
+        return new PetStatsDTO(adoptedCount, pendingCount, availableCount);
     }
 
 }
