@@ -1,6 +1,7 @@
 package com.rescueme.repository.dto;
 
 import com.rescueme.repository.entity.Pet;
+import com.rescueme.repository.entity.PetPhoto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import java.time.LocalDate;
@@ -25,7 +26,7 @@ public class PetResponseDTO {
         private String timeSpentInShelter;
         private String status;
         private String story;
-        private List<String> photoUrls;
+        private List<PetPhotoDTO> photos;
         private LocalDate createdAt;
         private Long shelterId;
         private String shelterUsername;
@@ -46,14 +47,17 @@ public class PetResponseDTO {
                         pet.getTimeSpentInShelter(),
                         pet.getStatus().name(),
                         pet.getStory(),
-                        pet.getPhotos() != null
-                                ? pet.getPhotos().stream()
-                                .map(photo -> "data:image/jpeg;base64," + Base64.getEncoder().encodeToString(photo.getPhotoData()))
-                                .collect(Collectors.toList())
-                                : null,
+                        PetPhotoDTO.toDtoList(pet.getPhotos()),
                         pet.getCreatedAt(),
                         pet.getShelter().getId(),
                         pet.getShelter().getUsername()
                 );
+        }
+
+        @Data
+        @AllArgsConstructor
+        public static class PhotoDTO {
+                private Long id;
+                private String url;
         }
 }

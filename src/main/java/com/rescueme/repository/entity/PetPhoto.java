@@ -1,5 +1,6 @@
 package com.rescueme.repository.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,6 +13,7 @@ import org.hibernate.type.descriptor.jdbc.VarbinaryJdbcType;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class PetPhoto {
 
     @Id

@@ -63,4 +63,6 @@ public class PetPhotoServiceImpl implements PetPhotoService {
     public void deletePhotoById(Long photoId) {
         petPhotoRepository.deleteById(photoId);
     }
+
+
 }

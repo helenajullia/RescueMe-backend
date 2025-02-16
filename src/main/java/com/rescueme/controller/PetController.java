@@ -1,5 +1,6 @@
 package com.rescueme.controller;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rescueme.repository.dto.PetResponseDTO;
 import com.rescueme.repository.dto.PetStatsDTO;
@@ -35,14 +36,20 @@ public class PetController {
             @RequestHeader("shelterId") Long shelterId
     ) {
         try {
+            System.out.println("Received petDataString: " + petDataString);
             ObjectMapper objectMapper = new ObjectMapper();
             Pet petData = objectMapper.readValue(petDataString, Pet.class);
+
+            System.out.println("Parsed pet data: " + petData);
+            System.out.println("Received shelterId: " + shelterId);
+            System.out.println("Received photos count: " + (photos != null ? photos.size() : 0));
 
             User shelter = userService.getUserById(shelterId);
             Pet savedPet = petService.addPet(petData, shelter, photos);
 
             return ResponseEntity.ok(PetResponseDTO.toDto(savedPet));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -64,19 +71,24 @@ public class PetController {
         }
     }
 
-    @PutMapping(value = "/update/{petId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PatchMapping(value = "/update/{petId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> updatePet(
             @PathVariable Long petId,
             @RequestPart(value = "petData", required = false) String petDataString,
             @RequestPart(value = "photos", required = false) List<MultipartFile> photos,
-            @RequestParam(value = "deleteExistingPhotos", required = false, defaultValue = "false") boolean deleteExistingPhotos,
+            @RequestPart(value = "photoIdsToDelete", required = false) String photoIdsToDeleteJson,
             @RequestHeader("shelterId") Long shelterId
     ) {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             Pet updatedPetData = petDataString != null ? objectMapper.readValue(petDataString, Pet.class) : new Pet();
 
-            Pet updatedPet = petService.updatePet(petId, updatedPetData, shelterId, photos, deleteExistingPhotos);
+            // Convertim lista de ID-uri a pozelor care trebuie șterse
+            List<Long> photoIdsToDelete = photoIdsToDeleteJson != null ?
+                    objectMapper.readValue(photoIdsToDeleteJson, new TypeReference<List<Long>>() {}) :
+                    List.of();
+
+            Pet updatedPet = petService.updatePet(petId, updatedPetData, shelterId, photos, photoIdsToDelete);
 
             return ResponseEntity.ok(PetResponseDTO.toDto(updatedPet));
         } catch (Exception e) {
@@ -85,6 +97,9 @@ public class PetController {
                     .body("Error updating pet: " + e.getMessage());
         }
     }
+
+
+
 
     @GetMapping("/stats")
     public PetStatsDTO getPetStats() {

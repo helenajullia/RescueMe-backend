@@ -1,5 +1,6 @@
 package com.rescueme.repository.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -31,6 +32,8 @@ public class Pet {
     private boolean neutered;
     private boolean urgentAdoptionNeeded;
     private String timeSpentInShelter;
+
+    @JsonIgnore
     private LocalDate createdAt;
 
     @Enumerated(EnumType.STRING)

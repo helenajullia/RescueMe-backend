@@ -67,7 +67,7 @@ public class PetServiceImpl implements PetService {
 
     @Override
     @Transactional
-    public Pet updatePet(Long petId, Pet updatedPetData, Long shelterId, List<MultipartFile> newPhotos, boolean deleteExistingPhotos) {
+    public Pet updatePet(Long petId, Pet updatedPetData, Long shelterId, List<MultipartFile> newPhotos, List<Long> photoIdsToDelete) {
         Optional<Pet> optionalPet = petRepository.findById(petId);
 
         if (optionalPet.isEmpty()) {
@@ -76,12 +76,12 @@ public class PetServiceImpl implements PetService {
 
         Pet existingPet = optionalPet.get();
 
-        // 🛑 Verificăm dacă utilizatorul are permisiunea de a modifica animalul
+        // 🛑 Verificăm permisiunea
         if (!existingPet.getShelter().getId().equals(shelterId)) {
             throw new SecurityException("You do not have permission to update this pet.");
         }
 
-        // 🔄 Actualizăm doar câmpurile care sunt trimise în request
+        // 🔄 Actualizăm doar câmpurile trimise
         if (updatedPetData.getName() != null) existingPet.setName(updatedPetData.getName());
         if (updatedPetData.getSpecies() != null) existingPet.setSpecies(updatedPetData.getSpecies());
         if (updatedPetData.getBreed() != null) existingPet.setBreed(updatedPetData.getBreed());
@@ -96,17 +96,23 @@ public class PetServiceImpl implements PetService {
         if (updatedPetData.getStatus() != null) existingPet.setStatus(updatedPetData.getStatus());
         if (updatedPetData.getStory() != null) existingPet.setStory(updatedPetData.getStory());
 
-        // 🖼️ Gestionăm pozele
-        if (deleteExistingPhotos) {
-            petPhotoService.deletePhotosByPetId(petId); // 🔥 Ștergem toate pozele dacă e cerut
+        // 🖼️ Ștergem doar pozele specificate
+        if (!photoIdsToDelete.isEmpty()) {
+            for (Long photoId : photoIdsToDelete) {
+                petPhotoService.deletePhotoById(photoId);
+            }
         }
 
+        // 📸 Adăugăm pozele noi dacă există
         if (newPhotos != null && !newPhotos.isEmpty()) {
-            petPhotoService.addPhotosToPet(existingPet, newPhotos); // 📸 Adăugăm noile poze
+            petPhotoService.addPhotosToPet(existingPet, newPhotos);
         }
 
         return petRepository.save(existingPet);
     }
+
+
+
 
     @Override
     public PetStatsDTO getPetStats() {
