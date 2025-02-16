@@ -43,7 +43,7 @@ public class Pet {
     private String story;
 
     @OneToMany(mappedBy = "pet", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<PetPhoto> photos;
+    private List<PetPhoto> photos = new ArrayList<>();
 
     @PrePersist
     public void prePersist() {

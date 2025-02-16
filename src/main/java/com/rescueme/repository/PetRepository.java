@@ -16,8 +16,8 @@ public interface PetRepository extends JpaRepository<Pet, Long> {
 
     List<Pet> findByShelterId(Long shelterId);
 
-    @Query("SELECT p FROM Pet p LEFT JOIN FETCH p.photos WHERE p.shelter.id = :shelterId")
-    List<Pet> findByShelterIdWithPhotos(@Param("shelterId") Long shelterId);
+//    @Query("SELECT p FROM Pet p LEFT JOIN FETCH p.photos WHERE p.shelter.id = :shelterId")
+//    List<Pet> findByShelterIdWithPhotos(@Param("shelterId") Long shelterId);
 
     int countByShelterIdAndStatus(Long shelterId, PetStatus status);
 }

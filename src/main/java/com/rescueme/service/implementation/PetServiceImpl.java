@@ -76,12 +76,11 @@ public class PetServiceImpl implements PetService {
 
         Pet existingPet = optionalPet.get();
 
-        // 🛑 Verificăm permisiunea
+
         if (!existingPet.getShelter().getId().equals(shelterId)) {
             throw new SecurityException("You do not have permission to update this pet.");
         }
 
-        // 🔄 Actualizăm doar câmpurile trimise
         if (updatedPetData.getName() != null) existingPet.setName(updatedPetData.getName());
         if (updatedPetData.getSpecies() != null) existingPet.setSpecies(updatedPetData.getSpecies());
         if (updatedPetData.getBreed() != null) existingPet.setBreed(updatedPetData.getBreed());
@@ -96,22 +95,18 @@ public class PetServiceImpl implements PetService {
         if (updatedPetData.getStatus() != null) existingPet.setStatus(updatedPetData.getStatus());
         if (updatedPetData.getStory() != null) existingPet.setStory(updatedPetData.getStory());
 
-        // 🖼️ Ștergem doar pozele specificate
         if (!photoIdsToDelete.isEmpty()) {
             for (Long photoId : photoIdsToDelete) {
                 petPhotoService.deletePhotoById(photoId);
             }
         }
 
-        // 📸 Adăugăm pozele noi dacă există
         if (newPhotos != null && !newPhotos.isEmpty()) {
             petPhotoService.addPhotosToPet(existingPet, newPhotos);
         }
 
         return petRepository.save(existingPet);
     }
-
-
 
 
     @Override

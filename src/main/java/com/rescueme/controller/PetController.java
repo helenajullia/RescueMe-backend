@@ -36,13 +36,13 @@ public class PetController {
             @RequestHeader("shelterId") Long shelterId
     ) {
         try {
-            System.out.println("Received petDataString: " + petDataString);
+//            System.out.println("Received petDataString: " + petDataString);
             ObjectMapper objectMapper = new ObjectMapper();
             Pet petData = objectMapper.readValue(petDataString, Pet.class);
 
-            System.out.println("Parsed pet data: " + petData);
-            System.out.println("Received shelterId: " + shelterId);
-            System.out.println("Received photos count: " + (photos != null ? photos.size() : 0));
+//            System.out.println("Parsed pet data: " + petData);
+//            System.out.println("Received shelterId: " + shelterId);
+//            System.out.println("Received photos count: " + (photos != null ? photos.size() : 0));
 
             User shelter = userService.getUserById(shelterId);
             Pet savedPet = petService.addPet(petData, shelter, photos);
@@ -62,6 +62,7 @@ public class PetController {
     }
 
 
+    //delete pet by shelter id
     @DeleteMapping("/{shelterId}/delete/{petId}")
     public ResponseEntity<String> deletePet(@PathVariable Long shelterId, @PathVariable Long petId) {
         if (petService.deletePetByShelterId(shelterId, petId)) {
@@ -83,7 +84,6 @@ public class PetController {
             ObjectMapper objectMapper = new ObjectMapper();
             Pet updatedPetData = petDataString != null ? objectMapper.readValue(petDataString, Pet.class) : new Pet();
 
-            // Convertim lista de ID-uri a pozelor care trebuie șterse
             List<Long> photoIdsToDelete = photoIdsToDeleteJson != null ?
                     objectMapper.readValue(photoIdsToDeleteJson, new TypeReference<List<Long>>() {}) :
                     List.of();
@@ -97,8 +97,6 @@ public class PetController {
                     .body("Error updating pet: " + e.getMessage());
         }
     }
-
-
 
 
     @GetMapping("/stats")

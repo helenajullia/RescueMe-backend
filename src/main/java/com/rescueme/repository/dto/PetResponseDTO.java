@@ -47,7 +47,7 @@ public class PetResponseDTO {
                         pet.getTimeSpentInShelter(),
                         pet.getStatus().name(),
                         pet.getStory(),
-                        PetPhotoDTO.toDtoList(pet.getPhotos()),
+                        pet.getPhotos() != null ? PetPhotoDTO.toDtoList(pet.getPhotos()) : List.of(),
                         pet.getCreatedAt(),
                         pet.getShelter().getId(),
                         pet.getShelter().getUsername()
