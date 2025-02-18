@@ -128,4 +128,13 @@ public class PetServiceImpl implements PetService {
         return new PetStatsDTO(adoptedCount, pendingCount, availableCount, shelterId);
     }
 
+    @Override
+    public List<String> getAllBreeds() {
+        return petRepository.findDistinctBreeds();
+    }
+
+    @Override
+    public List<String> getBreedsBySpecies(String species) {
+        return petRepository.findDistinctBreedsBySpecies(species);
+    }
 }

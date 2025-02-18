@@ -110,4 +110,16 @@ public class PetController {
         return ResponseEntity.ok(stats);
     }
 
+    @GetMapping("/breeds")
+    public ResponseEntity<List<String>> getBreeds() {
+        List<String> breeds = petService.getAllBreeds();
+        return ResponseEntity.ok(breeds);
+    }
+
+    @GetMapping("/breedsBySpecies")
+    public ResponseEntity<List<String>> getBreeds(@RequestParam String species) {
+        List<String> breeds = petService.getBreedsBySpecies(species);
+        return ResponseEntity.ok(breeds);
+    }
+
 }

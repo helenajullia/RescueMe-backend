@@ -14,10 +14,17 @@ public interface PetRepository extends JpaRepository<Pet, Long> {
 
     int countByStatus(PetStatus petStatus);
 
-    List<Pet> findByShelterId(Long shelterId);
-
-//    @Query("SELECT p FROM Pet p LEFT JOIN FETCH p.photos WHERE p.shelter.id = :shelterId")
-//    List<Pet> findByShelterIdWithPhotos(@Param("shelterId") Long shelterId);
+    List<Pet> findByShelterId(Long shelterId);;
 
     int countByShelterIdAndStatus(Long shelterId, PetStatus status);
+
+    @Query("SELECT DISTINCT p.breed FROM Pet p WHERE p.breed IS NOT NULL ORDER BY p.breed ASC")
+    List<String> findDistinctBreeds();
+
+
+    @Query("SELECT DISTINCT p.breed FROM Pet p WHERE p.species = :species AND p.breed IS NOT NULL ORDER BY p.breed ASC")
+    List<String> findDistinctBreedsBySpecies(@Param("species") String species);
+
+
+
 }
