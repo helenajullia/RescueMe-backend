@@ -12,6 +12,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -87,6 +89,44 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean usernameExists(String username) {
         return userRepository.existsByUsername(username);
+    }
+
+    @Override
+    public User updateUser(Long userId, Map<String, Object> updates) {
+        Optional<User> optionalUser = userRepository.findById(userId);
+
+        if (optionalUser.isEmpty()) {
+            throw new RuntimeException("User not found with ID: " + userId);
+        }
+
+        User user = optionalUser.get();
+
+        updates.forEach((key, value) -> {
+            switch (key) {
+                case "username":
+                    user.setUsername((String) value);
+                    break;
+                case "email":
+                    user.setEmail((String) value);
+                    break;
+                case "phoneNumber":
+                    user.setPhoneNumber((String) value);
+                    break;
+                case "county":
+                    user.setCounty((String) value);
+                    break;
+                case "city":
+                    user.setCity((String) value);
+                    break;
+                case "shelterType":
+                    user.setShelterType((String) value);
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown field: " + key);
+            }
+        });
+
+        return userRepository.save(user);
     }
 
 }

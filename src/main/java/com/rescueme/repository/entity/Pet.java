@@ -31,7 +31,7 @@ public class Pet {
     private boolean vaccinated;
     private boolean neutered;
     private boolean urgentAdoptionNeeded;
-    private String timeSpentInShelter;
+    private String timeSpentInShelter="0";
 
     @JsonIgnore
     private LocalDate createdAt;

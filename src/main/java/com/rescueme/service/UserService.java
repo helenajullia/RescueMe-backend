@@ -6,6 +6,7 @@ import com.rescueme.security.request.ShelterRegisterRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 public interface UserService {
@@ -23,4 +24,6 @@ public interface UserService {
     boolean emailExists(String email);
 
     boolean usernameExists(String username);
+
+    User updateUser(Long userId, Map<String, Object> updates);
 }
