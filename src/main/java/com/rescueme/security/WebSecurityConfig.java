@@ -39,6 +39,9 @@ public class WebSecurityConfig {
                         .requestMatchers("/api/v1/auth/login").permitAll()
                         .requestMatchers("/api/v1/auth/check-email").permitAll()
                         .requestMatchers("/api/v1/auth/check-username").permitAll()
+                        .requestMatchers("/api/v1/auth/request-reset").permitAll()
+                        .requestMatchers("/api/v1/auth/reset-password").permitAll()
+                        .requestMatchers("/api/v1/auth/change-password").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
