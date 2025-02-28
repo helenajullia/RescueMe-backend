@@ -3,8 +3,10 @@ package com.rescueme.controller;
 import com.rescueme.repository.entity.User;
 import com.rescueme.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -42,5 +44,31 @@ public class UserController {
         return ResponseEntity.ok(updatedUser);
     }
 
+    @PostMapping("/{id}/uploadProfilePicture")
+    public ResponseEntity<String> uploadProfilePicture(
+            @PathVariable Long id,
+            @RequestParam("file") MultipartFile file) {
+        userService.uploadProfilePicture(id, file);
+        return ResponseEntity.ok("Profile picture uploaded successfully");
+    }
+
+    @GetMapping("/{id}/profilePicture")
+    public ResponseEntity<byte[]> getProfilePicture(@PathVariable Long id) {
+        byte[] image = userService.getProfilePicture(id);
+
+        if (image == null || image.length == 0) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.IMAGE_JPEG)
+                .body(image);
+    }
+
+    @DeleteMapping("/{id}/profilePicture")
+    public ResponseEntity<String> deleteProfilePicture(@PathVariable Long id) {
+        userService.deleteProfilePicture(id);
+        return ResponseEntity.ok("Profile picture deleted successfully");
+    }
 
 }

@@ -10,7 +10,9 @@ import com.rescueme.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -127,6 +129,36 @@ public class UserServiceImpl implements UserService {
         });
 
         return userRepository.save(user);
+    }
+
+    @Override
+    public void uploadProfilePicture(Long userId, MultipartFile file) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        try {
+            user.setProfilePicture(file.getBytes());
+            userRepository.save(user);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to upload profile picture", e);
+        }
+    }
+
+    @Override
+    public byte[] getProfilePicture(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return user.getProfilePicture();
+    }
+
+    @Override
+    public void deleteProfilePicture(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        user.setProfilePicture(null);
+        userRepository.save(user);
     }
 
 }

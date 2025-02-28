@@ -3,6 +3,8 @@ package com.rescueme.repository.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import org.hibernate.annotations.JdbcType;
+import org.hibernate.type.descriptor.jdbc.VarbinaryJdbcType;
 
 @Data
 @Entity
@@ -39,4 +41,9 @@ public class User {
 
     @Column(name = "shelter_type")
     private String shelterType;
+
+    @Lob
+    @JdbcType(VarbinaryJdbcType.class)
+    @Column(name = "profile_picture", columnDefinition = "BYTEA")
+    private byte[] profilePicture;
 }
