@@ -123,6 +123,15 @@ public class UserServiceImpl implements UserService {
                 case "shelterType":
                     user.setShelterType((String) value);
                     break;
+                case "biography":
+                    user.setBiography((String) value);
+                    break;
+                case "fullAddress":
+                    user.setFullAddress((String) value);
+                    break;
+                case "zipCode":
+                    user.setZipCode((String) value);
+                    break;
                 default:
                     throw new IllegalArgumentException("Unknown field: " + key);
             }
@@ -130,6 +139,7 @@ public class UserServiceImpl implements UserService {
 
         return userRepository.save(user);
     }
+
 
     @Override
     public void uploadProfilePicture(Long userId, MultipartFile file) {

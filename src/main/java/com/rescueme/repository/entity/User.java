@@ -46,4 +46,13 @@ public class User {
     @JdbcType(VarbinaryJdbcType.class)
     @Column(name = "profile_picture", columnDefinition = "BYTEA")
     private byte[] profilePicture;
+
+    @Column(name = "biography", length = 500)
+    private String biography;
+
+    @Column(name = "full_address", length = 255)
+    private String fullAddress;
+
+    @Column(name = "zip_code", length = 10)
+    private String zipCode;
 }
