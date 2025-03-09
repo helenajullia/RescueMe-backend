@@ -30,4 +30,6 @@ public interface UserService {
     void uploadProfilePicture(Long userId, MultipartFile file);
     byte[] getProfilePicture(Long userId);
     void deleteProfilePicture(Long userId);
+
+    void changePassword(Long userId, String currentPassword, String newPassword);
 }

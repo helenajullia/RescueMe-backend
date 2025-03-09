@@ -3,11 +3,14 @@ package com.rescueme.controller;
 import com.rescueme.repository.entity.User;
 import com.rescueme.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -70,5 +73,19 @@ public class UserController {
         userService.deleteProfilePicture(id);
         return ResponseEntity.ok("Profile picture deleted successfully");
     }
+
+    @PatchMapping("/{userId}/change-password")
+    public ResponseEntity<?> changePassword(@PathVariable Long userId, @RequestBody Map<String, String> passwords) {
+        try {
+            userService.changePassword(userId, passwords.get("currentPassword"), passwords.get("newPassword"));
+            return ResponseEntity.ok(Collections.singletonMap("message", "Password changed successfully"));
+        } catch (ResponseStatusException e) {
+            return ResponseEntity.status(e.getStatusCode()).body(Collections.singletonMap("message", e.getReason()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.singletonMap("message", "An unexpected error occurred"));
+        }
+    }
+
+
 
 }

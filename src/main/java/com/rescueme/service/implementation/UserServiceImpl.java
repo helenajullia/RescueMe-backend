@@ -8,9 +8,11 @@ import com.rescueme.security.request.AdopterRegisterRequest;
 import com.rescueme.security.request.ShelterRegisterRequest;
 import com.rescueme.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.util.List;
@@ -170,5 +172,31 @@ public class UserServiceImpl implements UserService {
         user.setProfilePicture(null);
         userRepository.save(user);
     }
+
+    public void changePassword(Long userId, String currentPassword, String newPassword) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        // Verificare dacă parola curentă este corectă
+        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Current password is incorrect");
+        }
+
+        // Verificare dacă noua parolă este identică cu cea anterioară
+        if (passwordEncoder.matches(newPassword, user.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "New password must be different from the current password");
+        }
+
+        // Verificare cerințe parolă
+        if (newPassword.length() < 10 || !newPassword.matches(".*[a-z].*") || !newPassword.matches(".*[!@#?].*")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Password does not meet the required criteria");
+        }
+
+        // Salvarea parolei criptate
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
+
+
 
 }

@@ -87,7 +87,7 @@ public class AuthController {
                 "Hello " + user.getUsername() + ",\n\n" +
                         "You recently requested to reset your password for your RescueMe Site account. Click the link below to proceed:\n\n" +
                         resetLink + "\n\n" +
-                        "Your password won't change until you access the link above and create a new one. This password reset is only valid for the next 48 hours.\n\n"+
+                        "Your password won't change until you access the link above and create a new one.\n\n"+
                         "If you didn't request this, ignore this email.\n\n" +
                         "Thanks,\n\nRescueMe Team");
 
