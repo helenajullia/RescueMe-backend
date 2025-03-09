@@ -32,7 +32,6 @@ public class WebSecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors().configurationSource(corsConfigurationSource()).and()
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/uploads/**").permitAll()
                         .requestMatchers("/users/**").permitAll()
                         .requestMatchers("/pets/**").permitAll()
                         .requestMatchers("/api/v1/auth/register/**").permitAll()

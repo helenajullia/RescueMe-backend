@@ -6,6 +6,7 @@ import com.rescueme.security.request.AdopterRegisterRequest;
 import com.rescueme.security.request.LoginRequest;
 import com.rescueme.security.request.ShelterRegisterRequest;
 import com.rescueme.security.response.LoginResponse;
+import com.rescueme.service.EmailService;
 import com.rescueme.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -23,6 +24,8 @@ import java.util.UUID;
 public class AuthController {
     private final UserService userService;
     private final AuthService authService;
+
+    private final EmailService emailService;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final Map<String, String> resetTokens = new HashMap<>();
@@ -67,20 +70,36 @@ public class AuthController {
     }
 
     @PostMapping("/request-reset")
-    public ResponseEntity<Map<String, String>> requestPasswordReset(@RequestParam String email) {
+    public ResponseEntity<Map<String, String>> requestPasswordReset(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
         User user = userRepository.findByEmail(email).orElse(null);
+
         if (user == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "User not found"));
+            return ResponseEntity.badRequest().body(Map.of("message", "User not found"));
         }
 
         String token = UUID.randomUUID().toString();
         resetTokens.put(token, email);
 
-        return ResponseEntity.ok(Map.of("message", "Token generated", "token", token));
+        String resetLink = "http://localhost:5173/reset-password?token=" + token;
+
+        emailService.sendEmail(user.getEmail(), "Reset Your Password",
+                "Hello " + user.getUsername() + ",\n\n" +
+                        "You recently requested to reset your password for your RescueMe Site account. Click the link below to proceed:\n\n" +
+                        resetLink + "\n\n" +
+                        "Your password won't change until you access the link above and create a new one. This password reset is only valid for the next 48 hours.\n\n"+
+                        "If you didn't request this, ignore this email.\n\n" +
+                        "Thanks,\n\nRescueMe Team");
+
+        return ResponseEntity.ok(Map.of("message", "Password reset email sent!"));
     }
 
+
     @PostMapping("/reset-password")
-    public ResponseEntity<Map<String, String>> resetPassword(@RequestParam String token, @RequestParam String newPassword) {
+    public ResponseEntity<Map<String, String>> resetPassword(@RequestBody Map<String, String> payload) {
+        String token = payload.get("token");
+        String newPassword = payload.get("newPassword");
+
         String email = resetTokens.get(token);
         if (email == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "Invalid or expired token"));
@@ -98,22 +117,6 @@ public class AuthController {
         return ResponseEntity.ok(Map.of("message", "Password reset successfully"));
     }
 
-    @PostMapping("/change-password")
-    public ResponseEntity<Map<String, String>> changePassword(@RequestParam Long userId, @RequestParam String currentPassword, @RequestParam String newPassword) {
-        User user = userRepository.findById(userId).orElse(null);
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "User not found"));
-        }
-
-        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "Current password is incorrect"));
-        }
-
-        user.setPassword(passwordEncoder.encode(newPassword));
-        userRepository.save(user);
-
-        return ResponseEntity.ok(Map.of("message", "Password changed successfully"));
-    }
 
 
 }

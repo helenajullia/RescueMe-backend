@@ -13,6 +13,20 @@ spring:
         format_sql: true
     database: postgresql
     database-platform: org.hibernate.dialect.PostgreSQLDialect
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: "rescueme.care@gmail.com"
+    password: "ya29.a0AeXRPp6ozDHwrJsFUKwhKDH7K-z8SoNhdjPW8BczOKF0o5gq3NwFzStOWAdUkKChjs6ecPl8itBmT9xT_QY0-As4JeLFP80bCsK-c2TTDvSWyNIkQfa1n14mcU6tZKCwtMOedSCkxeEqNQsEHsf8ifKSga2z7MSYZaQ9l7NeaCgYKAfcSARMSFQHGX2MiuJ1gb0oNcb5XkfyKhvDSXQ0175"
+    properties:
+      mail:
+        smtp:
+          ssl:
+            trust: "*"
+          auth: true
+          starttls:
+            enable: true
+        smtp.auth.mechanisms: XOAUTH2
 
 jwt:
   secret: mySuperSecretKey12345678901234567890
