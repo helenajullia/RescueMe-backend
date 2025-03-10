@@ -10,6 +10,7 @@ import lombok.Data;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Data
 public class PetDTO {
@@ -31,7 +32,7 @@ public class PetDTO {
 
 //    @OneToMany(mappedBy = "pet", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 //    private List<PetPhoto> photos = new ArrayList<>();
-
+    private List<Long> photoIds;
 
     // Constructor
     public PetDTO(Pet pet) {
@@ -49,6 +50,11 @@ public class PetDTO {
         this.timeSpentInShelter= pet.getTimeSpentInShelter();
         this.status=pet.getStatus();
         this.story=pet.getStory();
+        if (pet.getPhotos() != null) {
+            this.photoIds = pet.getPhotos().stream()
+                    .map(photo -> photo.getId())
+                    .collect(Collectors.toList());
+        }
     }
 
     // Getters & Setters

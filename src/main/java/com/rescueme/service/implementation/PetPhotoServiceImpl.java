@@ -5,8 +5,11 @@ import com.rescueme.repository.entity.Pet;
 import com.rescueme.repository.entity.PetPhoto;
 import com.rescueme.service.PetPhotoService;
 import jakarta.transaction.Transactional;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Base64;
@@ -64,5 +67,11 @@ public class PetPhotoServiceImpl implements PetPhotoService {
         petPhotoRepository.deleteById(photoId);
     }
 
+    @Override
+    public PetPhoto getPhotoById(Long photoId) {
+        return petPhotoRepository.findById(photoId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Photo not found with ID: " + photoId));
+    }
 
 }

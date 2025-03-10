@@ -12,6 +12,7 @@ public interface PetPhotoService {
     void saveAllPhotos(List<PetPhoto> petPhotos);
 
     List<PetPhoto> getPhotosByPetId(Long petId);
+    PetPhoto getPhotoById(Long photoId);
 
     void deletePhotosByPetId(Long petId);
 
