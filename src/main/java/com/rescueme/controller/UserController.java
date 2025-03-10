@@ -1,5 +1,6 @@
 package com.rescueme.controller;
 
+import com.rescueme.repository.dto.UserDTO;
 import com.rescueme.repository.entity.User;
 import com.rescueme.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -84,6 +85,18 @@ public class UserController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.singletonMap("message", "An unexpected error occurred"));
         }
+    }
+
+    @GetMapping("/shelter/{shelterId}")
+    public ResponseEntity<User> getShelterById(@PathVariable Long shelterId) {
+        User shelter = userService.getShelterById(shelterId);
+        return ResponseEntity.ok(shelter);
+    }
+
+    @GetMapping("/shelters")
+    public ResponseEntity<List<UserDTO>> getAllShelters() {
+        List<UserDTO> shelters = userService.getAllShelters();
+        return ResponseEntity.ok(shelters);
     }
 
 

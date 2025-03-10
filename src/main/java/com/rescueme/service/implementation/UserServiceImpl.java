@@ -1,7 +1,10 @@
 package com.rescueme.service.implementation;
 
 import com.rescueme.exception.UsernameAlreadyExistException;
+import com.rescueme.repository.PetRepository;
 import com.rescueme.repository.UserRepository;
+import com.rescueme.repository.dto.UserDTO;
+import com.rescueme.repository.entity.Pet;
 import com.rescueme.repository.entity.Role;
 import com.rescueme.repository.entity.User;
 import com.rescueme.security.request.AdopterRegisterRequest;
@@ -24,6 +27,7 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final PetRepository petRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -196,6 +200,24 @@ public class UserServiceImpl implements UserService {
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
     }
+
+    @Override
+    public User getShelterById(Long shelterId) {
+        User shelter = userRepository.findById(shelterId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Shelter not found"));
+
+        if (!shelter.getRole().equals(Role.SHELTER)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User is not a shelter");
+        }
+
+        return shelter;
+    }
+
+    public List<UserDTO> getAllShelters() {
+        List<User> shelters = userRepository.findByRole(Role.SHELTER);
+        return shelters.stream().map(UserDTO::new).toList();
+    }
+
 
 
 

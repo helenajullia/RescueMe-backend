@@ -6,6 +6,9 @@ import lombok.Data;
 import org.hibernate.annotations.JdbcType;
 import org.hibernate.type.descriptor.jdbc.VarbinaryJdbcType;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Data
 @Entity
 @Table(name = "users")
@@ -55,4 +58,7 @@ public class User {
 
     @Column(name = "zip_code", length = 10)
     private String zipCode;
+
+    @OneToMany(mappedBy = "shelter", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Pet> pets = new ArrayList<>();
 }

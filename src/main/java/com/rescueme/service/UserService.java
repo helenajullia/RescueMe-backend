@@ -1,5 +1,6 @@
 package com.rescueme.service;
 
+import com.rescueme.repository.dto.UserDTO;
 import com.rescueme.repository.entity.User;
 import com.rescueme.security.request.AdopterRegisterRequest;
 import com.rescueme.security.request.ShelterRegisterRequest;
@@ -32,4 +33,6 @@ public interface UserService {
     void deleteProfilePicture(Long userId);
 
     void changePassword(Long userId, String currentPassword, String newPassword);
+    User getShelterById(Long shelterId);
+    List<UserDTO> getAllShelters();
 }
