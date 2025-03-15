@@ -17,7 +17,7 @@ spring:
     host: smtp.gmail.com
     port: 587
     username: "rescueme.care@gmail.com"
-    password: "ya29.a0AeXRPp6U-SmsgWRKNqjgA_-fc-duAiCCJDdoAyCtMjLpKbjpS99XYtJxNO0urB-LALyjNO2Xvfs5FVO5W6fV71FNCls1kDw984ugOqSzSTIQThFQNmBgTMN1sgXNlzNrqd6rrfwqcaOwKRvF8rrvDQeLGGrM2-eTDf7QDvKHaCgYKATwSARMSFQHGX2Mie6iKKQfvKdCAdFnwEL5cyQ0175"
+    password: "ya29.a0AeXRPp5wx3gsB_JY8AgLDY37fB4DAto4cxs_w0aNtrE1iPYPilBU_TJAcqZx7TTsD0ckAcnRPzi3oIihe2rVN2-mgCZHk9ei89ZOwznQy2uy0yWuT2JsEy0Oz6NG_fRVtXpL5lDNi6BM_Y0qQ3CU-f1bFfu4XbJIR4ArcW_CaCgYKAdUSARMSFQHGX2Mi8BqTzHV-4hB9_qs2u2BmkQ0175"
     properties:
       mail:
         smtp:

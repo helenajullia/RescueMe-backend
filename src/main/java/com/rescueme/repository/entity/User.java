@@ -1,5 +1,6 @@
 package com.rescueme.repository.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
@@ -60,5 +61,6 @@ public class User {
     private String zipCode;
 
     @OneToMany(mappedBy = "shelter", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<Pet> pets = new ArrayList<>();
 }

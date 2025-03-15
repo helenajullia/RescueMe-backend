@@ -15,7 +15,7 @@ public class UserDTO {
     private String biography;
 
     private byte[] profilePicture;
-    private List<PetDTO> pets;
+    private List<PetResponseDTO> pets;
 
     public UserDTO(User user) {
         this.id = user.getId();
@@ -25,6 +25,6 @@ public class UserDTO {
         this.shelterType=user.getShelterType();
         this.biography = user.getBiography();
         this.profilePicture= user.getProfilePicture();
-        this.pets = user.getPets().stream().map(PetDTO::new).toList();
+        this.pets = user.getPets().stream().map(PetResponseDTO::toDto).toList();
     }
 }
