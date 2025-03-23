@@ -19,11 +19,11 @@ public class ShelterRegisterRequest {
     @NotBlank
     private String password;
 
-    @NotBlank
-    private String county;
-
-    @NotBlank
-    private String city;
+//    @NotBlank
+//    private String county;
+//
+//    @NotBlank
+//    private String city;
 
     @NotBlank
     private String shelterType;

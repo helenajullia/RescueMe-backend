@@ -7,6 +7,7 @@ import lombok.Data;
 import org.hibernate.annotations.JdbcType;
 import org.hibernate.type.descriptor.jdbc.VarbinaryJdbcType;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,7 +27,6 @@ public class User {
     @Column(name = "username", nullable = false, unique = true)
     @Size(min = 3, max = 20, message = "Username must be between 3 and 20 characters.")
     private String username;
-
 
     @Column(name = "email", nullable = false, unique = true)
     private String email;
@@ -51,14 +51,33 @@ public class User {
     @Column(name = "profile_picture", columnDefinition = "BYTEA")
     private byte[] profilePicture;
 
-    @Column(name = "biography", length = 500)
-    private String biography;
+//    @Column(name = "biography", length = 500)
+//    private String biography;
 
     @Column(name = "full_address", length = 255)
     private String fullAddress;
 
     @Column(name = "zip_code", length = 10)
     private String zipCode;
+
+    @Column(name = "year_founded")
+    private Integer yearFounded;
+
+    @Column(name = "hours_of_operation")
+    private String hoursOfOperation;
+
+    @Column(name = "mission", length = 500)
+    private String mission;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    private ShelterStatus status = ShelterStatus.NEW; // Default status for new shelters
+
+    @Column(name = "submitted_at")
+    private LocalDateTime submittedAt;
+
+    @Column(name = "approved_at")
+    private LocalDateTime approvedAt;
 
     @OneToMany(mappedBy = "shelter", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonIgnore

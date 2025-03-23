@@ -15,7 +15,7 @@ public interface UserService {
 
     void addAdopter(AdopterRegisterRequest registerRequest);
 
-    void addShelter(ShelterRegisterRequest registerRequest);
+    Long addShelter(ShelterRegisterRequest registerRequest);
 
     User getUserById(Long userId);
 

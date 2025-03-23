@@ -51,7 +51,7 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
     }
     @Override
-    public void addShelter(ShelterRegisterRequest registerRequest) {
+    public Long addShelter(ShelterRegisterRequest registerRequest) {
         if (userRepository.existsByEmail(registerRequest.getEmail())) {
             throw new UsernameAlreadyExistException("Email already exists");
         }
@@ -62,12 +62,12 @@ public class UserServiceImpl implements UserService {
         user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
         user.setRole(Role.SHELTER);
         user.setPhoneNumber(registerRequest.getPhoneNumber());
-        user.setCounty(registerRequest.getCounty());
-        user.setCity(registerRequest.getCity());
         user.setShelterType(registerRequest.getShelterType());
 
-        userRepository.save(user);
+        User savedUser = userRepository.save(user);
+        return savedUser.getId();
     }
+
 
 
     @Override
@@ -129,8 +129,8 @@ public class UserServiceImpl implements UserService {
                 case "shelterType":
                     user.setShelterType((String) value);
                     break;
-                case "biography":
-                    user.setBiography((String) value);
+                case "mission":
+                    user.setMission((String) value);
                     break;
                 case "fullAddress":
                     user.setFullAddress((String) value);

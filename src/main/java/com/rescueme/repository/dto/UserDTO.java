@@ -12,7 +12,7 @@ public class UserDTO {
     private String county;
     private String city;
     private String shelterType;
-    private String biography;
+    private String mission;
 
     private byte[] profilePicture;
     private List<PetResponseDTO> pets;
@@ -23,7 +23,7 @@ public class UserDTO {
         this.county = user.getCounty();
         this.city = user.getCity();
         this.shelterType=user.getShelterType();
-        this.biography = user.getBiography();
+        this.mission = user.getMission();
         this.profilePicture= user.getProfilePicture();
         this.pets = user.getPets().stream().map(PetResponseDTO::toDto).toList();
     }

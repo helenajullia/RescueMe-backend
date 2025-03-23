@@ -39,12 +39,16 @@ public class AuthController {
     }
 
     @PostMapping("/register/shelter")
-    public ResponseEntity<Map<String, String>> registerShelter(@RequestBody ShelterRegisterRequest registerRequest) {
-        userService.addShelter(registerRequest);
-        Map<String, String> response = new HashMap<>();
+    public ResponseEntity<Map<String, Object>> registerShelter(@RequestBody ShelterRegisterRequest registerRequest) {
+        Long Id = userService.addShelter(registerRequest);
+
+        Map<String, Object> response = new HashMap<>();
         response.put("message", "Shelter registered successfully");
+        response.put("Id", Id);
+
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
 
 
     @PostMapping("/login")
