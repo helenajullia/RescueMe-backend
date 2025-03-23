@@ -1,6 +1,7 @@
 package com.rescueme.repository;
 
 import com.rescueme.repository.entity.Role;
+import com.rescueme.repository.entity.ShelterStatus;
 import com.rescueme.repository.entity.User;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -26,5 +27,8 @@ public interface UserRepository extends JpaRepository<User, Long>{
 
     List<User> findByRole(Role role);
 
+    Long countByRole(Role role);
+
+    Long countByRoleAndStatus(Role role, ShelterStatus status);
 
 }
