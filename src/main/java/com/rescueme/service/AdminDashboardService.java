@@ -1,5 +1,9 @@
 package com.rescueme.service;
 
+import com.rescueme.repository.entity.User;
+
+import java.util.List;
+
 public interface AdminDashboardService {
     Long getTotalSheltersCount();
 
@@ -8,4 +12,6 @@ public interface AdminDashboardService {
     Long getTotalUsersCount();
 
     Long getTotalPetsCount();
+
+    List<User> getPendingShelters();
 }

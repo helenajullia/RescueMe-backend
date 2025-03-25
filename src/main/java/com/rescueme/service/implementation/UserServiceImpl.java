@@ -6,6 +6,7 @@ import com.rescueme.repository.UserRepository;
 import com.rescueme.repository.dto.UserDTO;
 import com.rescueme.repository.entity.Pet;
 import com.rescueme.repository.entity.Role;
+import com.rescueme.repository.entity.ShelterStatus;
 import com.rescueme.repository.entity.User;
 import com.rescueme.security.request.AdopterRegisterRequest;
 import com.rescueme.security.request.ShelterRegisterRequest;
@@ -18,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -137,6 +139,36 @@ public class UserServiceImpl implements UserService {
                     break;
                 case "zipCode":
                     user.setZipCode((String) value);
+                    break;
+                case "approvedAt":
+                    if (value instanceof LocalDateTime) {
+                        user.setApprovedAt((LocalDateTime) value);
+                    }
+                    break;
+                case "firstLoginAfterApproval":
+                    if (value instanceof Boolean) {
+                        user.setFirstLoginAfterApproval((Boolean) value);
+                    } else if (value instanceof String) {
+                        user.setFirstLoginAfterApproval(Boolean.valueOf((String) value));
+                    }
+                    break;
+                case "status":
+                    if (value instanceof ShelterStatus) {
+                        user.setStatus((ShelterStatus) value);
+                        if (value == ShelterStatus.APPROVED) {
+                            user.setApprovedAt(LocalDateTime.now());
+                        }
+                    } else if (value instanceof String) {
+                        try {
+                            ShelterStatus status = ShelterStatus.valueOf((String) value);
+                            user.setStatus(status);
+                            if (status == ShelterStatus.APPROVED) {
+                                user.setApprovedAt(LocalDateTime.now());
+                            }
+                        } catch (IllegalArgumentException e) {
+                            throw new IllegalArgumentException("Invalid shelter status: " + value);
+                        }
+                    }
                     break;
                 default:
                     throw new IllegalArgumentException("Unknown field: " + key);

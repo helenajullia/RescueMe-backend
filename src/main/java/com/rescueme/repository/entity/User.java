@@ -50,10 +50,6 @@ public class User {
     @JdbcType(VarbinaryJdbcType.class)
     @Column(name = "profile_picture", columnDefinition = "BYTEA")
     private byte[] profilePicture;
-
-//    @Column(name = "biography", length = 500)
-//    private String biography;
-
     @Column(name = "full_address", length = 255)
     private String fullAddress;
 
@@ -78,6 +74,9 @@ public class User {
 
     @Column(name = "approved_at")
     private LocalDateTime approvedAt;
+
+    @Column(name = "first_login_after_approval")
+    private Boolean firstLoginAfterApproval = false; // Default to false for non approved accounts
 
     @OneToMany(mappedBy = "shelter", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonIgnore

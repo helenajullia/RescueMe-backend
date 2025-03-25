@@ -135,4 +135,23 @@ public class ShelterProfileController {
         // Ultimate fallback
         return MediaType.APPLICATION_OCTET_STREAM;
     }
+
+    @GetMapping("/{shelterId}/check-welcome")
+    public ResponseEntity<Map<String, Boolean>> checkWelcomeStatus(@PathVariable Long shelterId) {
+        User shelter = userService.getShelterById(shelterId);
+
+        Map<String, Boolean> response = new HashMap<>();
+        response.put("showWelcome", shelter.getFirstLoginAfterApproval() != null && shelter.getFirstLoginAfterApproval());
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/{shelterId}/acknowledge-welcome")
+    public ResponseEntity<?> acknowledgeWelcome(@PathVariable Long shelterId) {
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("firstLoginAfterApproval", false);
+        userService.updateUser(shelterId, updates);
+
+        return ResponseEntity.ok(Collections.singletonMap("message", "Welcome acknowledged"));
+    }
 }

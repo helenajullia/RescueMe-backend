@@ -4,9 +4,12 @@ import com.rescueme.repository.PetRepository;
 import com.rescueme.repository.UserRepository;
 import com.rescueme.repository.entity.Role;
 import com.rescueme.repository.entity.ShelterStatus;
+import com.rescueme.repository.entity.User;
 import com.rescueme.service.AdminDashboardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -33,5 +36,10 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
     @Override
     public Long getTotalPetsCount() {
         return petRepository.count();
+    }
+
+    @Override
+    public List<User> getPendingShelters() {
+        return userRepository.findByRoleAndStatus(Role.SHELTER, ShelterStatus.PENDING_APPROVAL);
     }
 }
