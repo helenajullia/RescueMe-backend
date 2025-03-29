@@ -42,4 +42,11 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
     public List<User> getPendingShelters() {
         return userRepository.findByRoleAndStatus(Role.SHELTER, ShelterStatus.PENDING_APPROVAL);
     }
+
+    @Override
+    public List<User> getApprovedShelters() {
+        return userRepository.findByRoleAndStatus(Role.SHELTER, ShelterStatus.APPROVED);
+    }
+
+
 }

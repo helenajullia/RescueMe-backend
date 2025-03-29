@@ -14,4 +14,6 @@ public interface AdminDashboardService {
     Long getTotalPetsCount();
 
     List<User> getPendingShelters();
+
+    List<User> getApprovedShelters();
 }

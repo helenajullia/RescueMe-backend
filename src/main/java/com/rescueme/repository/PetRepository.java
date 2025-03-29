@@ -25,6 +25,6 @@ public interface PetRepository extends JpaRepository<Pet, Long> {
     @Query("SELECT DISTINCT p.breed FROM Pet p WHERE p.species = :species AND p.breed IS NOT NULL ORDER BY p.breed ASC")
     List<String> findDistinctBreedsBySpecies(@Param("species") String species);
 
-
+    long countByShelterId(Long shelterId);
 
 }

@@ -52,6 +52,11 @@ public class AdminDashboardController {
         return ResponseEntity.ok(adminDashboardService.getPendingShelters());
     }
 
+    @GetMapping("/shelters/approved")
+    public ResponseEntity<List<User>> getApprovedShelters() {
+        return ResponseEntity.ok(adminDashboardService.getApprovedShelters());
+    }
+
     @PostMapping("/shelters/{shelterId}/approve")
     public ResponseEntity<Map<String, Object>> approveShelter(@PathVariable Long shelterId) {
         User shelter = userService.getShelterById(shelterId);

@@ -77,64 +77,6 @@ public class ShelterProfileController {
         }
     }
 
-//    @PostMapping("/{shelterId}/documents/{documentType}")
-//    public ResponseEntity<?> uploadDocument(
-//            @PathVariable Long shelterId,
-//            @PathVariable String documentType,
-//            @RequestParam("file") MultipartFile file) {
-//
-//        try {
-//            shelterProfileService.uploadDocument(shelterId, documentType, file);
-//            return ResponseEntity.ok(Collections.singletonMap("message", "Document uploaded successfully"));
-//        } catch (Exception e) {
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-//                    .body(Collections.singletonMap("message", "Failed to upload document: " + e.getMessage()));
-//        }
-//    }
-
-//    @GetMapping("/{shelterId}/documents/{documentType}")
-//    public ResponseEntity<byte[]> getDocument(
-//            @PathVariable Long shelterId,
-//            @PathVariable String documentType) {
-//
-//        byte[] document = shelterProfileService.getDocument(shelterId, documentType);
-//
-//        if (document == null || document.length == 0) {
-//            return ResponseEntity.notFound().build();
-//        }
-//
-//        // Determine content type based on document type or extension
-//        MediaType contentType = determineContentType(documentType, shelterProfileService.getDocumentContentType(shelterId, documentType));
-//
-//        return ResponseEntity.ok()
-//                .contentType(contentType)
-//                .body(document);
-//    }
-
-    private MediaType determineContentType(String documentType, String contentTypeStr) {
-        if (contentTypeStr != null && !contentTypeStr.isEmpty()) {
-            try {
-                return MediaType.parseMediaType(contentTypeStr);
-            } catch (Exception e) {
-                // Log the error
-                System.err.println("Error parsing media type: " + e.getMessage());
-            }
-        }
-
-        // Default content types based on document extension
-        if (contentTypeStr != null) {
-            if (contentTypeStr.contains("pdf")) {
-                return MediaType.APPLICATION_PDF;
-            } else if (contentTypeStr.contains("jpeg") || contentTypeStr.contains("jpg")) {
-                return MediaType.IMAGE_JPEG;
-            } else if (contentTypeStr.contains("png")) {
-                return MediaType.IMAGE_PNG;
-            }
-        }
-
-        // Ultimate fallback
-        return MediaType.APPLICATION_OCTET_STREAM;
-    }
 
     @GetMapping("/{shelterId}/check-welcome")
     public ResponseEntity<Map<String, Boolean>> checkWelcomeStatus(@PathVariable Long shelterId) {

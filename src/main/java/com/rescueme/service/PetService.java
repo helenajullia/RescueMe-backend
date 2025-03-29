@@ -27,4 +27,6 @@ public interface PetService {
     PetStatsDTO getPetStatsByShelter(Long shelterId);
     List<String> getAllBreeds();
     List<String> getBreedsBySpecies(String species);
+
+    long countPetsByShelter(Long shelterId);
 }

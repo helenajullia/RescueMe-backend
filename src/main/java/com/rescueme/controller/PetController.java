@@ -122,4 +122,10 @@ public class PetController {
         return ResponseEntity.ok(breeds);
     }
 
+    @GetMapping("/count/{shelterId}")
+    public ResponseEntity<Long> getPetCountByShelter(@PathVariable Long shelterId) {
+        long petCount = petService.countPetsByShelter(shelterId);
+        return ResponseEntity.ok(petCount);
+    }
+
 }

@@ -137,4 +137,9 @@ public class PetServiceImpl implements PetService {
     public List<String> getBreedsBySpecies(String species) {
         return petRepository.findDistinctBreedsBySpecies(species);
     }
+
+    @Override
+    public long countPetsByShelter(Long shelterId) {
+        return petRepository.countByShelterId(shelterId);
+    }
 }

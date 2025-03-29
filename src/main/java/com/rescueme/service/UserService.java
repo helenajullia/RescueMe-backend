@@ -28,11 +28,16 @@ public interface UserService {
     boolean usernameExists(String username);
 
     User updateUser(Long userId, Map<String, Object> updates);
+
     void uploadProfilePicture(Long userId, MultipartFile file);
+
     byte[] getProfilePicture(Long userId);
+
     void deleteProfilePicture(Long userId);
 
     void changePassword(Long userId, String currentPassword, String newPassword);
+
     User getShelterById(Long shelterId);
+
     List<UserDTO> getAllShelters();
 }
