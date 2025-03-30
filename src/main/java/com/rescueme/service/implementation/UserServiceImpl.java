@@ -45,7 +45,6 @@ public class UserServiceImpl implements UserService {
         user.setRole(Role.ADOPTER);
         user.setPhoneNumber(registerRequest.getPhoneNumber());
 
-
         user.setCounty(null);
         user.setCity(null);
         user.setShelterType(null);
@@ -139,6 +138,22 @@ public class UserServiceImpl implements UserService {
                     break;
                 case "zipCode":
                     user.setZipCode((String) value);
+                    break;
+                case "yearFounded":
+                    if (value instanceof Integer) {
+                        user.setYearFounded((Integer) value);
+                    } else if (value instanceof String) {
+                        try {
+                            user.setYearFounded(Integer.parseInt((String) value));
+                        } catch (NumberFormatException e) {
+                            throw new IllegalArgumentException("Invalid year format: " + value);
+                        }
+                    } else if (value instanceof Number) {
+                        user.setYearFounded(((Number) value).intValue());
+                    }
+                    break;
+                case "hoursOfOperation":
+                    user.setHoursOfOperation((String) value);
                     break;
                 case "approvedAt":
                     if (value instanceof LocalDateTime) {

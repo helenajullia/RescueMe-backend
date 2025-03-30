@@ -26,7 +26,6 @@ public class ShelterProfileController {
     public ResponseEntity<Map<String, Object>> getShelterProfile(@PathVariable Long shelterId) {
         User shelter = userService.getShelterById(shelterId);
 
-        // Create response with all necessary profile data
         Map<String, Object> response = new HashMap<>();
         response.put("id", shelter.getId());
         response.put("username", shelter.getUsername());
@@ -42,12 +41,12 @@ public class ShelterProfileController {
         response.put("mission", shelter.getMission());
         response.put("status", shelter.getStatus());
 
-        // Add document status information (boolean flags indicating if documents were uploaded)
         Map<String, Boolean> documentStatus = shelterProfileService.getDocumentStatus(shelterId);
         response.put("documents", documentStatus);
 
         return ResponseEntity.ok(response);
     }
+
 
     @PatchMapping("/{shelterId}/profile/draft")
     public ResponseEntity<?> saveShelterProfileDraft(
