@@ -27,4 +27,6 @@ public interface PetRepository extends JpaRepository<Pet, Long> {
 
     long countByShelterId(Long shelterId);
 
+    int countByShelterIdAndUrgentAdoptionNeededTrue(Long shelterId);
+
 }

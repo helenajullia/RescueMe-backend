@@ -109,24 +109,27 @@ public class PetServiceImpl implements PetService {
     }
 
 
-    @Override
-    public PetStatsDTO getPetStats() {
-        int adoptedCount = petRepository.countByStatus(PetStatus.ADOPTED);
-        int pendingCount = petRepository.countByStatus(PetStatus.PENDING);
-        int availableCount = petRepository.countByStatus(PetStatus.AVAILABLE);
-
-        return new PetStatsDTO(adoptedCount, pendingCount, availableCount);
-    }
+//    @Override
+//    public PetStatsDTO getPetStats() {
+//        int adoptedCount = petRepository.countByStatus(PetStatus.ADOPTED);
+//        int pendingCount = petRepository.countByStatus(PetStatus.PENDING);
+//        int availableCount = petRepository.countByStatus(PetStatus.AVAILABLE);
+//
+//        return new PetStatsDTO(adoptedCount, pendingCount, availableCount);
+//    }
 
 
     @Override
     public PetStatsDTO getPetStatsByShelter(Long shelterId) {
+        long total = petRepository.countByShelterId(shelterId);
+        int urgentCount = petRepository.countByShelterIdAndUrgentAdoptionNeededTrue(shelterId);
         int adoptedCount = petRepository.countByShelterIdAndStatus(shelterId, PetStatus.ADOPTED);
         int pendingCount = petRepository.countByShelterIdAndStatus(shelterId, PetStatus.PENDING);
         int availableCount = petRepository.countByShelterIdAndStatus(shelterId, PetStatus.AVAILABLE);
 
-        return new PetStatsDTO(adoptedCount, pendingCount, availableCount, shelterId);
+        return new PetStatsDTO(adoptedCount, pendingCount, availableCount, shelterId, total, urgentCount);
     }
+
 
     @Override
     public List<String> getAllBreeds() {

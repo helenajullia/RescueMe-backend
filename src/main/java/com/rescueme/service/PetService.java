@@ -22,7 +22,7 @@ public interface PetService {
 
     public List<PetResponseDTO> getPetsByShelterId(Long shelterId);
 
-    PetStatsDTO getPetStats();
+//    PetStatsDTO getPetStats();
 
     PetStatsDTO getPetStatsByShelter(Long shelterId);
     List<String> getAllBreeds();

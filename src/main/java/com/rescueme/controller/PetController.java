@@ -33,7 +33,7 @@ public class PetController {
     public ResponseEntity<PetResponseDTO> addPet(
             @RequestPart("petData") String petDataString,
             @RequestPart(value = "photos", required = false) List<MultipartFile> photos,
-            @RequestHeader("shelterId") Long shelterId
+            @RequestHeader("Id") Long shelterId
     ) {
         try {
 //            System.out.println("Received petDataString: " + petDataString);
@@ -78,7 +78,7 @@ public class PetController {
             @RequestPart(value = "petData", required = false) String petDataString,
             @RequestPart(value = "photos", required = false) List<MultipartFile> photos,
             @RequestPart(value = "photoIdsToDelete", required = false) String photoIdsToDeleteJson,
-            @RequestHeader("shelterId") Long shelterId
+            @RequestHeader("Id") Long Id
     ) {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
@@ -88,7 +88,7 @@ public class PetController {
                     objectMapper.readValue(photoIdsToDeleteJson, new TypeReference<List<Long>>() {}) :
                     List.of();
 
-            Pet updatedPet = petService.updatePet(petId, updatedPetData, shelterId, photos, photoIdsToDelete);
+            Pet updatedPet = petService.updatePet(petId, updatedPetData, Id, photos, photoIdsToDelete);
 
             return ResponseEntity.ok(PetResponseDTO.toDto(updatedPet));
         } catch (Exception e) {
@@ -99,10 +99,10 @@ public class PetController {
     }
 
 
-    @GetMapping("/stats")
-    public PetStatsDTO getPetStats() {
-        return petService.getPetStats();
-    }
+//    @GetMapping("/stats")
+//    public PetStatsDTO getPetStats() {
+//        return petService.getPetStats();
+//    }
 
     @GetMapping("/stats/{shelterId}")
     public ResponseEntity<PetStatsDTO> getPetStatsByShelter(@PathVariable Long shelterId) {
