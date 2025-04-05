@@ -44,5 +44,5 @@ public class Document {
     private LocalDateTime updatedAt;
 
     @Column(name = "file_size")
-    private Long fileSize;  // Adăugat pentru a urmări dimensiunea fișierului
+    private Long fileSize;
 }

@@ -29,6 +29,14 @@ public class PetServiceImpl implements PetService {
     }
 
     @Override
+    public List<PetResponseDTO> getAllPets() {
+        return petRepository.findAll().stream()
+                .map(PetResponseDTO::toDto)
+                .collect(Collectors.toList());
+    }
+
+
+    @Override
     public Pet addPet(Pet pet, User shelter, List<MultipartFile> photos) {
         pet.setShelter(shelter);
         Pet savedPet = petRepository.save(pet);
@@ -145,4 +153,12 @@ public class PetServiceImpl implements PetService {
     public long countPetsByShelter(Long shelterId) {
         return petRepository.countByShelterId(shelterId);
     }
+
+    @Override
+    public List<PetResponseDTO> getPetsByStatus(PetStatus status) {
+        return petRepository.findByStatus(status).stream()
+                .map(PetResponseDTO::toDto)
+                .collect(Collectors.toList());
+    }
+
 }

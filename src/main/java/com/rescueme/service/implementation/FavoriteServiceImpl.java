@@ -39,9 +39,7 @@ public class FavoriteServiceImpl implements FavoriteService {
         validateUser(userId);
         validatePet(petId);
 
-        // Check if already a favorite
         if (favoriteRepository.findByUserIdAndPetId(userId, petId).isPresent()) {
-            // If it's already a favorite, we'll just return without an error
             return;
         }
 
@@ -56,8 +54,6 @@ public class FavoriteServiceImpl implements FavoriteService {
     @Transactional
     public void removeFavorite(Long userId, Long petId) {
         validateUser(userId);
-
-        // No need to validate pet ID here since we're just removing it
         favoriteRepository.deleteByUserIdAndPetId(userId, petId);
     }
 
@@ -67,7 +63,7 @@ public class FavoriteServiceImpl implements FavoriteService {
         return favoriteRepository.findByUserIdAndPetId(userId, petId).isPresent();
     }
 
-    // Helper methods for validation
+
     private void validateUser(Long userId) {
         if (!userRepository.existsById(userId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found with ID: " + userId);

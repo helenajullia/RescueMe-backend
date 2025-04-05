@@ -21,9 +21,6 @@ public class DocumentController {
 
     private final DocumentService documentService;
 
-    /**
-     * Încarcă un document pentru un adăpost
-     */
     @PostMapping("/{shelterId}/documents/{documentType}")
     public ResponseEntity<?> uploadDocument(
             @PathVariable Long shelterId,
@@ -51,9 +48,7 @@ public class DocumentController {
         }
     }
 
-    /**
-     * Obține un document pentru un adăpost
-     */
+
     @GetMapping("/{shelterId}/documents/{documentType}")
     public ResponseEntity<byte[]> getDocument(
             @PathVariable Long shelterId,
@@ -66,7 +61,6 @@ public class DocumentController {
             byte[] document = documentService.getDocument(shelterId, documentType);
             String contentType = documentService.getDocumentContentType(shelterId, documentType);
 
-            // Determină MediaType în funcție de contentType
             MediaType mediaType = determineMediaType(contentType);
 
             log.info("Document livrat cu succes pentru adăpostul: {} și tipul: {}",
@@ -84,9 +78,7 @@ public class DocumentController {
         }
     }
 
-    /**
-     * Șterge un document
-     */
+
     @DeleteMapping("/{shelterId}/documents/{documentType}")
     public ResponseEntity<?> deleteDocument(
             @PathVariable Long shelterId,
@@ -104,9 +96,7 @@ public class DocumentController {
         }
     }
 
-    /**
-     * Obține statusul documentelor pentru un adăpost
-     */
+
     @GetMapping("/{shelterId}/documents/status")
     public ResponseEntity<Map<String, Boolean>> getDocumentStatus(@PathVariable Long shelterId) {
         try {
@@ -123,9 +113,7 @@ public class DocumentController {
         }
     }
 
-    /**
-     * Determină MediaType bazat pe content type
-     */
+
     private MediaType determineMediaType(String contentType) {
         try {
             if (contentType != null && !contentType.isEmpty()) {
@@ -135,7 +123,6 @@ public class DocumentController {
             log.warn("Eroare la parsarea tipului de media: {}", e.getMessage());
         }
 
-        // Fallback la application/octet-stream
         return MediaType.APPLICATION_OCTET_STREAM;
     }
 }

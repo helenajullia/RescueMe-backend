@@ -67,7 +67,7 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
-    private ShelterStatus status = ShelterStatus.NEW; // Default status for new shelters
+    private ShelterStatus status = ShelterStatus.NEW;
 
     @Column(name = "submitted_at")
     private LocalDateTime submittedAt;
@@ -76,7 +76,7 @@ public class User {
     private LocalDateTime approvedAt;
 
     @Column(name = "first_login_after_approval")
-    private Boolean firstLoginAfterApproval = false; // Default to false for non approved accounts
+    private Boolean firstLoginAfterApproval = false;
 
     @OneToMany(mappedBy = "shelter", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonIgnore

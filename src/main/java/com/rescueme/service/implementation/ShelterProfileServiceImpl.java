@@ -22,7 +22,7 @@ import java.util.Map;
 public class ShelterProfileServiceImpl implements ShelterProfileService {
 
     private final UserRepository userRepository;
-    private final DocumentService documentService; // Folosim serviciul specializat de documente
+    private final DocumentService documentService;
 
     @Override
     @Transactional
@@ -32,12 +32,12 @@ public class ShelterProfileServiceImpl implements ShelterProfileService {
 
         updateShelterFromMap(shelter, profileData);
 
-        // Set status to DRAFT
         shelter.setStatus(ShelterStatus.DRAFT);
 
         log.debug("Saving shelter profile draft for ID: {}", shelterId);
         return userRepository.save(shelter);
     }
+
 
     @Override
     @Transactional
@@ -47,10 +47,8 @@ public class ShelterProfileServiceImpl implements ShelterProfileService {
 
         updateShelterFromMap(shelter, profileData);
 
-        // Validate required fields for submission
         validateProfileForSubmission(shelter);
 
-        // Set status to PENDING_APPROVAL and record submission time
         shelter.setStatus(ShelterStatus.PENDING_APPROVAL);
         shelter.setSubmittedAt(LocalDateTime.now());
 
@@ -58,35 +56,34 @@ public class ShelterProfileServiceImpl implements ShelterProfileService {
         return userRepository.save(shelter);
     }
 
+
     @Override
     @Transactional
     public void uploadDocument(Long shelterId, String documentType, MultipartFile file) {
-        // Delegăm încărcarea documentului către serviciul specializat
         documentService.uploadDocument(shelterId, documentType, file);
     }
+
 
     @Override
     @Transactional(readOnly = true)
     public byte[] getDocument(Long shelterId, String documentType) {
-        // Delegăm obținerea documentului către serviciul specializat
         return documentService.getDocument(shelterId, documentType);
     }
 
     @Override
     @Transactional(readOnly = true)
     public String getDocumentContentType(Long shelterId, String documentType) {
-        // Delegăm obținerea tipului de conținut către serviciul specializat
         return documentService.getDocumentContentType(shelterId, documentType);
     }
+
 
     @Override
     @Transactional(readOnly = true)
     public Map<String, Boolean> getDocumentStatus(Long shelterId) {
-        // Delegăm verificarea statutului documentelor către serviciul specializat
         return documentService.getDocumentStatus(shelterId);
     }
 
-    // Helper methods
+
 
     private void updateShelterFromMap(User shelter, Map<String, Object> profileData) {
         if (profileData.containsKey("username") && profileData.get("username") != null) {

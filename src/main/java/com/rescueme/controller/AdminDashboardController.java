@@ -61,7 +61,6 @@ public class AdminDashboardController {
     public ResponseEntity<Map<String, Object>> approveShelter(@PathVariable Long shelterId) {
         User shelter = userService.getShelterById(shelterId);
 
-        // Create a map of updates
         Map<String, Object> updates = new HashMap<>();
         updates.put("status", ShelterStatus.APPROVED);
         updates.put("approvedAt", LocalDateTime.now());
@@ -80,13 +79,10 @@ public class AdminDashboardController {
     public ResponseEntity<Map<String, String>> rejectShelter(@PathVariable Long shelterId) {
         User shelter = userService.getShelterById(shelterId);
 
-        // Update shelter status to rejected
         shelter.setStatus(ShelterStatus.REJECTED);
         userService.updateUser(shelterId, Map.of("status", ShelterStatus.REJECTED));
 
         return ResponseEntity.ok(Map.of("message", "Shelter rejected successfully"));
     }
-
-
 
 }

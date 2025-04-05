@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rescueme.repository.dto.PetResponseDTO;
 import com.rescueme.repository.dto.PetStatsDTO;
 import com.rescueme.repository.entity.Pet;
+import com.rescueme.repository.entity.PetStatus;
 import com.rescueme.repository.entity.User;
 import com.rescueme.service.PetService;
 import com.rescueme.service.UserService;
@@ -29,6 +30,13 @@ public class PetController {
 
     }
 
+    @GetMapping("/all")
+    public ResponseEntity<List<PetResponseDTO>> getAllPets() {
+        List<PetResponseDTO> allPets = petService.getAllPets();
+        return ResponseEntity.ok(allPets);
+    }
+
+
     @PostMapping(value = "/add", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<PetResponseDTO> addPet(
             @RequestPart("petData") String petDataString,
@@ -36,13 +44,9 @@ public class PetController {
             @RequestHeader("Id") Long shelterId
     ) {
         try {
-//            System.out.println("Received petDataString: " + petDataString);
             ObjectMapper objectMapper = new ObjectMapper();
             Pet petData = objectMapper.readValue(petDataString, Pet.class);
 
-//            System.out.println("Parsed pet data: " + petData);
-//            System.out.println("Received shelterId: " + shelterId);
-//            System.out.println("Received photos count: " + (photos != null ? photos.size() : 0));
 
             User shelter = userService.getUserById(shelterId);
             Pet savedPet = petService.addPet(petData, shelter, photos);
@@ -62,7 +66,6 @@ public class PetController {
     }
 
 
-    //delete pet by shelter id
     @DeleteMapping("/{shelterId}/delete/{petId}")
     public ResponseEntity<String> deletePet(@PathVariable Long shelterId, @PathVariable Long petId) {
         if (petService.deletePetByShelterId(shelterId, petId)) {
@@ -126,6 +129,12 @@ public class PetController {
     public ResponseEntity<Long> getPetCountByShelter(@PathVariable Long shelterId) {
         long petCount = petService.countPetsByShelter(shelterId);
         return ResponseEntity.ok(petCount);
+    }
+
+    @GetMapping("/available")
+    public ResponseEntity<List<PetResponseDTO>> getAllAvailablePets() {
+        List<PetResponseDTO> pets = petService.getPetsByStatus(PetStatus.AVAILABLE);
+        return ResponseEntity.ok(pets);
     }
 
 }

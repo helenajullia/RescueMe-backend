@@ -48,5 +48,4 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
         return userRepository.findByRoleAndStatus(Role.SHELTER, ShelterStatus.APPROVED);
     }
 
-
 }

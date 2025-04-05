@@ -87,6 +87,7 @@ public class ShelterProfileController {
         return ResponseEntity.ok(response);
     }
 
+
     @PostMapping("/{shelterId}/acknowledge-welcome")
     public ResponseEntity<?> acknowledgeWelcome(@PathVariable Long shelterId) {
         Map<String, Object> updates = new HashMap<>();

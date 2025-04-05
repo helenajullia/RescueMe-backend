@@ -27,14 +27,11 @@ public class PetDTO {
     private boolean urgentAdoptionNeeded;
     private String timeSpentInShelter="0";
     private PetStatus status;
-
     private String story;
-
-//    @OneToMany(mappedBy = "pet", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-//    private List<PetPhoto> photos = new ArrayList<>();
     private List<Long> photoIds;
 
-    // Constructor
+
+
     public PetDTO(Pet pet) {
         this.id = pet.getId();
         this.name = pet.getName();
@@ -57,6 +54,5 @@ public class PetDTO {
         }
     }
 
-    // Getters & Setters
 }
 

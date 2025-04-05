@@ -38,6 +38,7 @@ public class WebSecurityConfig {
                         .requestMatchers("/api/v1/shelters/**").permitAll()
                         .requestMatchers("/api/v1/admin/**").permitAll()
                         .requestMatchers("/api/v1/favorites/**").permitAll()
+                        .requestMatchers("/api/v1/adoptions/**").permitAll()
                         .requestMatchers("/api/v1/auth/register/**").permitAll()
                         .requestMatchers("/api/v1/auth/login").permitAll()
                         .requestMatchers("/api/v1/auth/check-email").permitAll()

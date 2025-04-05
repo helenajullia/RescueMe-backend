@@ -228,25 +228,23 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-        // Verificare dacă parola curentă este corectă
         if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Current password is incorrect");
         }
 
-        // Verificare dacă noua parolă este identică cu cea anterioară
         if (passwordEncoder.matches(newPassword, user.getPassword())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "New password must be different from the current password");
         }
 
-        // Verificare cerințe parolă
         if (newPassword.length() < 10 || !newPassword.matches(".*[a-z].*") || !newPassword.matches(".*[!@#?].*")) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Password does not meet the required criteria");
         }
 
-        // Salvarea parolei criptate
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
     }
+
+
 
     @Override
     public User getShelterById(Long shelterId) {
@@ -264,8 +262,4 @@ public class UserServiceImpl implements UserService {
         List<User> shelters = userRepository.findByRole(Role.SHELTER);
         return shelters.stream().map(UserDTO::new).toList();
     }
-
-
-
-
 }
