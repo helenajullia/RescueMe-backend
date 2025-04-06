@@ -5,7 +5,9 @@ import com.rescueme.repository.dto.AdoptionResponseDTO;
 import com.rescueme.repository.entity.AdoptionRequest;
 import com.rescueme.repository.entity.AdoptionRequestStatus;
 import com.rescueme.service.AdoptionService;
+import com.rescueme.utils.AdoptionMapperUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -95,6 +97,21 @@ public class AdoptionController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error canceling adoption request: " + e.getMessage(), e);
+        }
+    }
+
+    @PostMapping("/requests/{requestId}/complete")
+    public ResponseEntity<AdoptionResponseDTO> completeAdoption(@PathVariable String requestId) {
+        try {
+            AdoptionRequest completedRequest = adoptionService.completeAdoption(requestId);
+            // Folosește metoda statică direct
+            AdoptionResponseDTO response = AdoptionMapperUtil.toDTO(completedRequest);
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Error completing adoption: " + e.getMessage(), e);
         }
     }
 }

@@ -15,7 +15,7 @@ public class AdoptionResponseDTO {
     private String id;
     private Long userId;
     private String userName;
-    private Long petId;
+    private PetDTO pet;
     private String petName;
     private Map<String, Object> requestDetails;
     private AdoptionRequestStatus status;

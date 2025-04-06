@@ -1,19 +1,14 @@
 package com.rescueme.utils;
 
 import com.rescueme.repository.dto.AdoptionResponseDTO;
+import com.rescueme.repository.dto.PetDTO;
 import com.rescueme.repository.entity.AdoptionRequest;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * Utility class for mapping between AdoptionRequest entities and DTOs
- */
 public class AdoptionMapperUtil {
 
-    /**
-     * Converts an AdoptionRequest entity to an AdoptionResponseDTO
-     */
     public static AdoptionResponseDTO toDTO(AdoptionRequest adoptionRequest) {
         if (adoptionRequest == null) {
             return null;
@@ -23,7 +18,7 @@ public class AdoptionMapperUtil {
         dto.setId(adoptionRequest.getId());
         dto.setUserId(adoptionRequest.getUser().getId());
         dto.setUserName(adoptionRequest.getUser().getUsername());
-        dto.setPetId(adoptionRequest.getPet().getId());
+        dto.setPet(new PetDTO(adoptionRequest.getPet()));
         dto.setPetName(adoptionRequest.getPet().getName());
         dto.setRequestDetails(adoptionRequest.getRequestDetails());
         dto.setStatus(adoptionRequest.getStatus());
@@ -34,9 +29,6 @@ public class AdoptionMapperUtil {
         return dto;
     }
 
-    /**
-     * Converts a list of AdoptionRequest entities to a list of AdoptionResponseDTOs
-     */
     public static List<AdoptionResponseDTO> toDTOList(List<AdoptionRequest> adoptionRequests) {
         if (adoptionRequests == null) {
             return null;

@@ -1,7 +1,9 @@
 package com.rescueme.controller;
 
 import com.rescueme.repository.dto.UserDTO;
+import com.rescueme.repository.entity.Pet;
 import com.rescueme.repository.entity.User;
+import com.rescueme.service.PetService;
 import com.rescueme.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,6 +23,7 @@ import java.util.Map;
 public class UserController {
 
     private final UserService userService;
+    private final PetService petService;
 
     @GetMapping("/{userId}")
     public ResponseEntity<User> getUserById(@PathVariable Long userId) {
@@ -99,6 +102,21 @@ public class UserController {
         return ResponseEntity.ok(shelters);
     }
 
+    @GetMapping("/shelter/by-pet/{petId}")
+    public ResponseEntity<User> getShelterByPetId(@PathVariable Long petId) {
+        try {
+            // Get the pet
+            Pet pet = petService.getPetById(petId);
+            if (pet == null) {
+                return ResponseEntity.notFound().build();
+            }
 
+            // Get the shelter from the pet
+            User shelter = pet.getShelter();
+            return ResponseEntity.ok(shelter);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
 
 }
