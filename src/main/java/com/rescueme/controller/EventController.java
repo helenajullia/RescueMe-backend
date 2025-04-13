@@ -1,6 +1,7 @@
 package com.rescueme.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.rescueme.repository.EventRepository;
 import com.rescueme.repository.dto.EventResponseDTO;
 import com.rescueme.repository.entity.AttendanceStatus;
 import com.rescueme.repository.entity.Event;
@@ -26,6 +27,8 @@ public class EventController {
 
     private final EventService eventService;
     private final ObjectMapper objectMapper;
+
+    private final EventRepository eventRepository;
 
     @PostMapping
     public ResponseEntity<EventResponseDTO> createEvent(
@@ -167,5 +170,12 @@ public class EventController {
     public ResponseEntity<List<Map<String, Object>>> getAllEventsGroupedByShelter() {
         return ResponseEntity.ok(eventService.getEventsGroupedByShelter());
     }
+
+    @GetMapping("/active")
+    public ResponseEntity<List<Event>> getActiveEvents() {
+        List<Event> activeEvents = eventRepository.findByIsActiveTrue();
+        return ResponseEntity.ok(activeEvents);
+    }
+
 
 }

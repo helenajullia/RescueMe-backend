@@ -52,5 +52,6 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     @Query("SELECT e FROM Event e WHERE LOWER(e.county) LIKE LOWER(CONCAT('%',:searchTerm,'%')) OR LOWER(e.city) LIKE LOWER(CONCAT('%',:searchTerm,'%'))")
     List<Event> searchByCountyOrCity(@Param("searchTerm") String searchTerm);
 
+    List<Event> findByIsActiveTrue();
 
 }
