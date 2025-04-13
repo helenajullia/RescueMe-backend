@@ -1,5 +1,6 @@
 package com.rescueme.repository.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -25,8 +26,9 @@ public class EventAttendee {
 
     @ManyToOne
     @JoinColumn(name = "event_id", nullable = false)
-    @JsonIgnore
+    @JsonBackReference
     private Event event;
+
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)

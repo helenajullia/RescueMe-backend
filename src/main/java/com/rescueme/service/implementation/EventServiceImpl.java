@@ -130,13 +130,13 @@ public class EventServiceImpl implements EventService {
         Event existingEvent = validateEventOwnership(eventId, shelterId);
 
         // Validate event dates
-        if (eventDetails.getStartDateTime().isBefore(LocalDateTime.now())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Event start date cannot be in the past");
-        }
-
-        if (eventDetails.getEndDateTime().isBefore(eventDetails.getStartDateTime())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Event end date must be after start date");
-        }
+//        if (eventDetails.getStartDateTime().isBefore(LocalDateTime.now())) {
+//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Event start date cannot be in the past");
+//        }
+//
+//        if (eventDetails.getEndDateTime().isBefore(eventDetails.getStartDateTime())) {
+//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Event end date must be after start date");
+//        }
 
         // Update fields
         existingEvent.setTitle(eventDetails.getTitle());

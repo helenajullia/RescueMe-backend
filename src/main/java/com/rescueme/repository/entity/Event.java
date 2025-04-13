@@ -2,6 +2,7 @@ package com.rescueme.repository.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -28,11 +29,9 @@ public class Event {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-//    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "MMM dd, yyyy HH:mm", locale = "en")
     @Column(nullable = false)
     private LocalDateTime startDateTime;
 
-//    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "MMM dd, yyyy HH:mm", locale = "en")
     @Column(nullable = false)
     private LocalDateTime endDateTime;
 
@@ -42,7 +41,7 @@ public class Event {
     @Column(nullable = false)
     private String address;
 
-    private String eventType; // adoption, fundraising, volunteer, educational, other
+    private String eventType;
 
     private Integer maxAttendees;
 
@@ -59,7 +58,9 @@ public class Event {
     private User shelter;
 
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<EventAttendee> attendees = new ArrayList<>();
+
 
     @PrePersist
     protected void onCreate() {
