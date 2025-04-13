@@ -141,12 +141,18 @@ public class AdoptionServiceImpl implements AdoptionService {
                     "Cannot complete adoption that is not in APPROVED status. Current status: " + adoptionRequest.getStatus());
         }
 
+        // ✅ setezi statusul cererii ca COMPLETED
+        adoptionRequest.setStatus(AdoptionRequestStatus.COMPLETED);
+
+        // ✅ setezi și statusul animalului ca ADOPTED
         Pet pet = adoptionRequest.getPet();
         pet.setStatus(PetStatus.ADOPTED);
-        petRepository.save(pet);
 
-        return adoptionRequest;
+        // ✅ salvezi modificările
+        petRepository.save(pet);
+        return adoptionRequestRepository.save(adoptionRequest); // << important!
     }
+
 
     @Override
     public void cancelAdoptionRequest(String requestId) {

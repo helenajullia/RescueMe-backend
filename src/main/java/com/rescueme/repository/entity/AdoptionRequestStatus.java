@@ -4,5 +4,6 @@ public enum AdoptionRequestStatus {
     PENDING,
     APPROVED,
     REJECTED,
-    CANCELED
+    CANCELED,
+    COMPLETED
 }
