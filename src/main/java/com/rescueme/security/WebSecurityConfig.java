@@ -32,9 +32,12 @@ public class WebSecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors().configurationSource(corsConfigurationSource()).and()
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/ws/**").permitAll()
                         .requestMatchers("/users/**").permitAll()
                         .requestMatchers("/pets/**").permitAll()
                         .requestMatchers("/pet-photos/**").permitAll()
+                        .requestMatchers("/api/test-notifications/**").permitAll()
+                        .requestMatchers("/api/notifications/**").permitAll()
                         .requestMatchers("/api/v1/shelters/**").permitAll()
                         .requestMatchers("/api/v1/admin/**").permitAll()
                         .requestMatchers("/api/v1/favorites/**").permitAll()

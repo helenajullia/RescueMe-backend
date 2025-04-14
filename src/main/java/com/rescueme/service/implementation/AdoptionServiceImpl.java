@@ -9,6 +9,7 @@ import com.rescueme.repository.dto.AdoptionResponseDTO;
 import com.rescueme.repository.dto.PetDTO;
 import com.rescueme.repository.entity.*;
 import com.rescueme.service.AdoptionService;
+import com.rescueme.service.NotificationService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,8 @@ public class AdoptionServiceImpl implements AdoptionService {
     private final UserRepository userRepository;
     private final PetRepository petRepository;
     private final ObjectMapper objectMapper;
+    private final NotificationService notificationService;
+
 
 
     @Override
@@ -127,6 +130,10 @@ public class AdoptionServiceImpl implements AdoptionService {
         }
 
         petRepository.save(pet);
+
+        boolean approved = status == AdoptionRequestStatus.APPROVED;
+        notificationService.sendNotificationToAdopter(adoptionRequest.getUser().getId(), pet.getName(), approved);
+
         return adoptionRequestRepository.save(adoptionRequest);
     }
 
@@ -204,6 +211,10 @@ public class AdoptionServiceImpl implements AdoptionService {
 
 
         AdoptionRequest savedRequest = adoptionRequestRepository.save(adoptionRequest);
+
+        notificationService.sendNotificationToShelter(pet.getShelter().getId(), pet.getName());
+
+
 
         return convertToDTO(savedRequest);
     }
