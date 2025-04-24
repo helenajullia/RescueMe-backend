@@ -37,7 +37,7 @@ spring:
         smtp.auth.mechanisms: XOAUTH2
 
 jwt:
-  secret: mySuperSecretKey12345678901234567890
+  secret: mySuperSecretKey1234567890123456789012345679
 
 
 cors:
