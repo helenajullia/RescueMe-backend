@@ -41,6 +41,7 @@ public class WebSecurityConfig {
                         .requestMatchers("/pet-photos/**").permitAll()
                         .requestMatchers("/api/test-notifications/**").permitAll()
                         .requestMatchers("/api/notifications/**").permitAll()
+                        .requestMatchers("/api/v1/messages/**").permitAll()
                         .requestMatchers("/api/v1/shelters/**").permitAll()
                         .requestMatchers("/api/v1/admin/**").permitAll()
                         .requestMatchers("/api/v1/favorites/**").permitAll()
