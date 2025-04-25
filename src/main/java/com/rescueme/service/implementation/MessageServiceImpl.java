@@ -9,6 +9,7 @@ import com.rescueme.repository.entity.Role;
 import com.rescueme.repository.entity.User;
 import com.rescueme.service.MessageService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -18,7 +19,6 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -27,10 +27,10 @@ public class MessageServiceImpl implements MessageService {
 
     private final MessageRepository messageRepository;
     private final UserRepository userRepository;
+
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
-    // În metoda sendMessage
     @Override
     @Transactional
     public MessageDTO sendMessage(MessageDTO messageDTO) {
@@ -55,24 +55,22 @@ public class MessageServiceImpl implements MessageService {
         // Create response DTO with additional user information
         MessageDTO responseDTO = convertToDTO(savedMessage, sender, recipient);
 
-        // Send message through WebSocket - use convertAndSend for reliability
+        // MODIFICAT: Trimitem mesajul direct la topic în loc de user queue
         try {
             String recipientId = recipient.getId().toString();
             System.out.println("Sending WebSocket message to recipient ID: " + recipientId);
 
-            // Importantă este următoarea linie - folosim formatul corect pentru destinație
-            messagingTemplate.convertAndSendToUser(
-                    recipientId,
-                    "queue/messages", // Fără slash la început!
+            // Folosim topic în loc de user queue
+            messagingTemplate.convertAndSend(
+                    "/topic/chat/" + recipientId,
                     responseDTO
             );
 
-            System.out.println("WebSocket message sent to /user/" + recipientId + "/queue/messages");
+            System.out.println("WebSocket message sent to /topic/chat/" + recipientId);
             log.info("Message sent via WebSocket to user: {}", recipient.getId());
         } catch (Exception e) {
             log.error("Failed to send message via WebSocket", e);
             e.printStackTrace();
-            // The message is still saved to DB, so it will be retrieved when the conversation is opened
         }
 
         return responseDTO;
@@ -121,10 +119,9 @@ public class MessageServiceImpl implements MessageService {
         Long partnerId = userIds[0].equals(userId.toString()) ?
                 Long.parseLong(userIds[1]) : Long.parseLong(userIds[0]);
 
-        // Send an update to the partner indicating messages have been read
-        messagingTemplate.convertAndSendToUser(
-                partnerId.toString(),
-                "/queue/read-receipts",
+        // MODIFICAT: Trimitem notificarea de read la topic în loc de user queue
+        messagingTemplate.convertAndSend(
+                "/topic/read/" + partnerId,
                 Map.of("conversationId", conversationId, "readBy", userId)
         );
     }
