@@ -26,6 +26,7 @@ public class MessageController {
      */
     @PostMapping("/send")
     public ResponseEntity<MessageDTO> sendMessage(@RequestBody MessageDTO messageDTO) {
+        System.out.println("🔄 REST message endpoint called with: " + messageDTO);
         MessageDTO sent = messageService.sendMessage(messageDTO);
         return ResponseEntity.ok(sent);
     }
@@ -35,6 +36,7 @@ public class MessageController {
      */
     @MessageMapping("/chat.send")
     public void sendMessageWebSocket(@Payload MessageDTO messageDTO) {
+        System.out.println("⚡ WebSocket message received: " + messageDTO);
         messageService.sendMessage(messageDTO);
         // The actual sending is handled in the service
     }
@@ -70,6 +72,7 @@ public class MessageController {
     public void markAsReadWebSocket(@Payload Map<String, Object> payload) {
         String conversationId = (String) payload.get("conversationId");
         Long userId = Long.valueOf(payload.get("userId").toString());
+        System.out.println("⚡ WebSocket mark as read received: " + conversationId + ", user: " + userId);
 
         messageService.markConversationAsRead(conversationId, userId);
     }
