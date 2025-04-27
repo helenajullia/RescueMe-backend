@@ -1,20 +1,28 @@
 package com.rescueme.service.implementation;
 
+import com.rescueme.repository.MessageAttachmentRepository;
 import com.rescueme.repository.MessageRepository;
 import com.rescueme.repository.UserRepository;
+import com.rescueme.repository.dto.AttachmentDTO;
 import com.rescueme.repository.dto.ConversationDTO;
 import com.rescueme.repository.dto.MessageDTO;
 import com.rescueme.repository.entity.Message;
+import com.rescueme.repository.entity.MessageAttachment;
 import com.rescueme.repository.entity.Role;
 import com.rescueme.repository.entity.User;
+import com.rescueme.service.AttachmentService;
 import com.rescueme.service.MessageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -26,7 +34,9 @@ import java.util.stream.Stream;
 public class MessageServiceImpl implements MessageService {
 
     private final MessageRepository messageRepository;
+    private final MessageAttachmentRepository attachmentRepository;
     private final UserRepository userRepository;
+    private final AttachmentService attachmentService;
 
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
@@ -49,13 +59,14 @@ public class MessageServiceImpl implements MessageService {
         message.setTimestamp(LocalDateTime.now());
         message.setRead(false);
         message.setConversationId(generateConversationId(messageDTO.getSenderId(), messageDTO.getRecipientId()));
+        message.setType(messageDTO.getType());
 
         Message savedMessage = messageRepository.save(message);
 
         // Create response DTO with additional user information
-        MessageDTO responseDTO = convertToDTO(savedMessage, sender, recipient);
+        MessageDTO responseDTO = convertToDTO(savedMessage, sender, recipient, new ArrayList<>());
 
-        // MODIFICAT: Trimitem mesajul direct la topic în loc de user queue
+        // Trimitem mesajul direct la topic în loc de user queue
         try {
             String recipientId = recipient.getId().toString();
             System.out.println("Sending WebSocket message to recipient ID: " + recipientId);
@@ -70,6 +81,81 @@ public class MessageServiceImpl implements MessageService {
             log.info("Message sent via WebSocket to user: {}", recipient.getId());
         } catch (Exception e) {
             log.error("Failed to send message via WebSocket", e);
+            e.printStackTrace();
+        }
+
+        return responseDTO;
+    }
+
+    @Override
+    @Transactional
+    public MessageDTO sendMessageWithAttachments(MessageDTO messageDTO, List<MultipartFile> files) throws IOException {
+        // Validate sender and recipient
+        User sender = userRepository.findById(messageDTO.getSenderId())
+                .orElseThrow(() -> new RuntimeException("Sender not found"));
+
+        User recipient = userRepository.findById(messageDTO.getRecipientId())
+                .orElseThrow(() -> new RuntimeException("Recipient not found"));
+
+        // Create and save the message
+        Message message = new Message();
+        message.setSenderId(messageDTO.getSenderId());
+        message.setRecipientId(messageDTO.getRecipientId());
+        message.setContent(messageDTO.getContent());
+        message.setTimestamp(LocalDateTime.now());
+        message.setRead(false);
+        message.setConversationId(generateConversationId(messageDTO.getSenderId(), messageDTO.getRecipientId()));
+        message.setType(MessageDTO.MessageType.TEXT);
+
+        // Determinăm tipul mesajului în funcție de atașamente
+        Message savedMessage = messageRepository.save(message);
+
+        // Adăugăm atașamentele
+        List<MessageAttachment> attachments = new ArrayList<>();
+        if (files != null && !files.isEmpty()) {
+            attachments = attachmentService.createAttachments(files, savedMessage.getId());
+
+            // Actualizăm tipul mesajului
+            boolean hasImages = attachments.stream()
+                    .anyMatch(a -> a.getContentType().startsWith("image/"));
+            boolean hasDocs = attachments.stream()
+                    .anyMatch(a -> !a.getContentType().startsWith("image/"));
+
+            if (hasImages && hasDocs) {
+                savedMessage.setType(MessageDTO.MessageType.MIXED);
+            } else if (hasImages) {
+                savedMessage.setType(MessageDTO.MessageType.IMAGE);
+            } else if (hasDocs) {
+                savedMessage.setType(MessageDTO.MessageType.DOCUMENT);
+            }
+
+            // Actualizăm mesajul
+            savedMessage = messageRepository.save(savedMessage);
+        }
+
+        // Convertim atașamentele în DTO-uri
+        List<AttachmentDTO> attachmentDTOs = attachments.stream()
+                .map(a -> attachmentService.convertToDTO(a, false))
+                .collect(Collectors.toList());
+
+        // Create response DTO with additional user information
+        MessageDTO responseDTO = convertToDTO(savedMessage, sender, recipient, attachmentDTOs);
+
+        // Trimitem mesajul direct la topic în loc de user queue
+        try {
+            String recipientId = recipient.getId().toString();
+            System.out.println("Sending WebSocket message with attachments to recipient ID: " + recipientId);
+
+            // Folosim topic în loc de user queue
+            messagingTemplate.convertAndSend(
+                    "/topic/chat/" + recipientId,
+                    responseDTO
+            );
+
+            System.out.println("WebSocket message with attachments sent to /topic/chat/" + recipientId);
+            log.info("Message with attachments sent via WebSocket to user: {}", recipient.getId());
+        } catch (Exception e) {
+            log.error("Failed to send message with attachments via WebSocket", e);
             e.printStackTrace();
         }
 
@@ -95,12 +181,31 @@ public class MessageServiceImpl implements MessageService {
         Map<Long, User> usersMap = userRepository.findAllById(userIds).stream()
                 .collect(Collectors.toMap(User::getId, user -> user));
 
+        // Obținem toate ID-urile mesajelor pentru a încărca atașamentele
+        List<Long> messageIds = messages.stream()
+                .map(Message::getId)
+                .collect(Collectors.toList());
+
+        // Obținem atașamentele pentru toate mesajele
+        List<MessageAttachment> allAttachments = attachmentRepository.findByMessageIdIn(messageIds);
+
+        // Grupăm atașamentele după messageId
+        Map<Long, List<MessageAttachment>> attachmentsByMessageId = allAttachments.stream()
+                .collect(Collectors.groupingBy(MessageAttachment::getMessageId));
+
         // Convert to DTOs with user information
         return messages.stream()
                 .map(message -> {
                     User sender = usersMap.get(message.getSenderId());
                     User recipient = usersMap.get(message.getRecipientId());
-                    return convertToDTO(message, sender, recipient);
+
+                    // Obținem atașamentele acestui mesaj
+                    List<MessageAttachment> messageAttachments = attachmentsByMessageId.getOrDefault(message.getId(), new ArrayList<>());
+                    List<AttachmentDTO> attachmentDTOs = messageAttachments.stream()
+                            .map(a -> attachmentService.convertToDTO(a, false))
+                            .collect(Collectors.toList());
+
+                    return convertToDTO(message, sender, recipient, attachmentDTOs);
                 })
                 .collect(Collectors.toList());
     }
@@ -119,7 +224,7 @@ public class MessageServiceImpl implements MessageService {
         Long partnerId = userIds[0].equals(userId.toString()) ?
                 Long.parseLong(userIds[1]) : Long.parseLong(userIds[0]);
 
-        // MODIFICAT: Trimitem notificarea de read la topic în loc de user queue
+        // Trimitem notificarea de read la topic în loc de user queue
         messagingTemplate.convertAndSend(
                 "/topic/read/" + partnerId,
                 Map.of("conversationId", conversationId, "readBy", userId)
@@ -165,7 +270,34 @@ public class MessageServiceImpl implements MessageService {
                     participant.getProfilePicture() != null ?
                             Base64.getEncoder().encodeToString(participant.getProfilePicture()) : null
             );
-            conversationDTO.setLastMessage(latestMessage.getContent());
+
+            // Actualizăm afișarea mesajului în funcție de tip
+            String lastMessageContent = latestMessage.getContent();
+            if (latestMessage.getType() != MessageDTO.MessageType.TEXT) {
+                long attachmentCount = attachmentRepository.countByMessageId(latestMessage.getId());
+
+                switch (latestMessage.getType()) {
+                    case IMAGE:
+                        lastMessageContent = attachmentCount > 1
+                                ? attachmentCount + " imagini"
+                                : "📷 Imagine";
+                        break;
+                    case DOCUMENT:
+                        lastMessageContent = attachmentCount > 1
+                                ? attachmentCount + " documente"
+                                : "📄 Document";
+                        break;
+                    case MIXED:
+                        lastMessageContent = "📎 " + attachmentCount + " atașamente";
+                        break;
+                }
+
+                if (!latestMessage.getContent().trim().isEmpty()) {
+                    lastMessageContent = latestMessage.getContent() + " [" + lastMessageContent + "]";
+                }
+            }
+
+            conversationDTO.setLastMessage(lastMessageContent);
             conversationDTO.setLastMessageTime(latestMessage.getTimestamp());
             conversationDTO.setHasUnreadMessages(unreadCount > 0);
             conversationDTO.setUnreadCount(unreadCount);
@@ -198,6 +330,31 @@ public class MessageServiceImpl implements MessageService {
         return smallerId + "_" + largerId;
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public byte[] getAttachmentContent(Long attachmentId) {
+        MessageAttachment attachment = attachmentRepository.findById(attachmentId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Atașament negăsit cu ID: " + attachmentId));
+
+        return attachment.getFileData();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public byte[] getAttachmentThumbnail(Long attachmentId) {
+        MessageAttachment attachment = attachmentRepository.findById(attachmentId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Atașament negăsit cu ID: " + attachmentId));
+
+        if (!attachment.isHasThumbnail() || attachment.getThumbnailData() == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Miniatura nu există pentru atașamentul cu ID: " + attachmentId);
+        }
+
+        return attachment.getThumbnailData();
+    }
+
     // Helper methods
     private boolean isUserInConversation(Long userId, String conversationId) {
         String[] parts = conversationId.split("_");
@@ -228,7 +385,7 @@ public class MessageServiceImpl implements MessageService {
         }
     }
 
-    private MessageDTO convertToDTO(Message message, User sender, User recipient) {
+    private MessageDTO convertToDTO(Message message, User sender, User recipient, List<AttachmentDTO> attachments) {
         MessageDTO dto = new MessageDTO();
         dto.setId(message.getId());
         dto.setSenderId(message.getSenderId());
@@ -238,7 +395,12 @@ public class MessageServiceImpl implements MessageService {
         dto.setRead(message.isRead());
         dto.setConversationId(message.getConversationId());
 
-        // Add user information
+        // Verifică dacă tipul este null și setează valoarea implicită TEXT
+        dto.setType(message.getType() != null ? message.getType() : MessageDTO.MessageType.TEXT);
+
+        dto.setAttachments(attachments);
+
+        // Restul codului rămâne neschimbat
         if (sender != null) {
             dto.setSenderUsername(sender.getUsername());
             if (sender.getProfilePicture() != null) {

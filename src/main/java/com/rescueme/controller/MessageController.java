@@ -4,18 +4,25 @@ import com.rescueme.repository.dto.ConversationDTO;
 import com.rescueme.repository.dto.MessageDTO;
 import com.rescueme.service.MessageService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/messages")
 @RequiredArgsConstructor
+@Slf4j
 public class MessageController {
 
     private final MessageService messageService;
@@ -26,9 +33,39 @@ public class MessageController {
      */
     @PostMapping("/send")
     public ResponseEntity<MessageDTO> sendMessage(@RequestBody MessageDTO messageDTO) {
-        System.out.println("🔄 REST message endpoint called with: " + messageDTO);
+        log.info("🔄 REST message endpoint called with: {}", messageDTO);
         MessageDTO sent = messageService.sendMessage(messageDTO);
         return ResponseEntity.ok(sent);
+    }
+
+    /**
+     * REST endpoint to send a message with attachments
+     */
+    @PostMapping(value = "/send-with-attachments", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> sendMessageWithAttachments(
+            @RequestPart("message") MessageDTO messageDTO,
+            @RequestPart(value = "files", required = false) List<MultipartFile> files) {
+
+        log.info("🔄 REST message with attachments endpoint called: {}", messageDTO);
+
+        try {
+            if (files == null || files.isEmpty()) {
+                return ResponseEntity.ok(messageService.sendMessage(messageDTO));
+            }
+
+            MessageDTO sent = messageService.sendMessageWithAttachments(messageDTO, files);
+            return ResponseEntity.ok(sent);
+        } catch (IOException e) {
+            log.error("Eroare la procesarea atașamentelor", e);
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Eroare la procesarea atașamentelor: " + e.getMessage()));
+        } catch (Exception e) {
+            log.error("Eroare neașteptată la trimiterea mesajului", e);
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Eroare la trimiterea mesajului: " + e.getMessage()));
+        }
     }
 
     /**
@@ -36,7 +73,7 @@ public class MessageController {
      */
     @MessageMapping("/chat.send")
     public void sendMessageWebSocket(@Payload MessageDTO messageDTO) {
-        System.out.println("⚡ WebSocket message received: " + messageDTO);
+        log.info("⚡ WebSocket message received: {}", messageDTO);
         messageService.sendMessage(messageDTO);
         // The actual sending is handled in the service
     }
@@ -72,7 +109,7 @@ public class MessageController {
     public void markAsReadWebSocket(@Payload Map<String, Object> payload) {
         String conversationId = (String) payload.get("conversationId");
         Long userId = Long.valueOf(payload.get("userId").toString());
-        System.out.println("⚡ WebSocket mark as read received: " + conversationId + ", user: " + userId);
+        log.info("⚡ WebSocket mark as read received: {}, user: {}", conversationId, userId);
 
         messageService.markConversationAsRead(conversationId, userId);
     }

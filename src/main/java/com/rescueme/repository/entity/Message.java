@@ -1,11 +1,14 @@
 package com.rescueme.repository.entity;
 
+import com.rescueme.repository.dto.MessageDTO;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "messages")
@@ -36,6 +39,14 @@ public class Message {
     @Column(name = "conversation_id", nullable = false)
     private String conversationId;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "message_type")
+    private MessageDTO.MessageType type = MessageDTO.MessageType.TEXT;
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JoinColumn(name = "messageId")
+    private List<MessageAttachment> attachments = new ArrayList<>();
+
     // Pre persist callback to set timestamp if not set
     @PrePersist
     protected void onCreate() {
@@ -50,5 +61,25 @@ public class Message {
             long largerId = Math.max(senderId, recipientId);
             conversationId = smallerId + "_" + largerId;
         }
+
+        // Determine message type based on attachments
+        if (!attachments.isEmpty()) {
+            boolean hasImages = attachments.stream()
+                    .anyMatch(a -> a.getContentType().startsWith("image/"));
+            boolean hasDocs = attachments.stream()
+                    .anyMatch(a -> !a.getContentType().startsWith("image/"));
+
+            if (hasImages && hasDocs) {
+                this.type = MessageDTO.MessageType.MIXED;
+            } else if (hasImages) {
+                this.type = MessageDTO.MessageType.IMAGE;
+            } else {
+                this.type = MessageDTO.MessageType.DOCUMENT;
+            }
+        }
+    }
+
+    public MessageDTO.MessageType getType() {
+        return type != null ? type : MessageDTO.MessageType.TEXT;
     }
 }
