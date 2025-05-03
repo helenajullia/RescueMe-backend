@@ -47,22 +47,19 @@ public class Message {
     @JoinColumn(name = "messageId")
     private List<MessageAttachment> attachments = new ArrayList<>();
 
-    // Pre persist callback to set timestamp if not set
+
     @PrePersist
     protected void onCreate() {
         if (timestamp == null) {
             timestamp = LocalDateTime.now();
         }
 
-        // Ensure the conversationId is created if not present
         if (conversationId == null || conversationId.isEmpty()) {
-            // Create a consistent conversationId by sorting the user IDs
             long smallerId = Math.min(senderId, recipientId);
             long largerId = Math.max(senderId, recipientId);
             conversationId = smallerId + "_" + largerId;
         }
 
-        // Determine message type based on attachments
         if (!attachments.isEmpty()) {
             boolean hasImages = attachments.stream()
                     .anyMatch(a -> a.getContentType().startsWith("image/"));

@@ -18,5 +18,5 @@ public class ConversationDTO {
     private LocalDateTime lastMessageTime;
     private boolean hasUnreadMessages;
     private Long unreadCount;
-    private Long participantRole; // 1 for ADOPTER, 2 for SHELTER
+    private Long participantRole; // 1 pt ADOPTER, 2 pt SHELTER
 }

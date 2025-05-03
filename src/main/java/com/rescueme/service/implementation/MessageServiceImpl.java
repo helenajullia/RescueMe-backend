@@ -279,16 +279,16 @@ public class MessageServiceImpl implements MessageService {
                 switch (latestMessage.getType()) {
                     case IMAGE:
                         lastMessageContent = attachmentCount > 1
-                                ? attachmentCount + " imagini"
+                                ? attachmentCount + " images"
                                 : "📷 Imagine";
                         break;
                     case DOCUMENT:
                         lastMessageContent = attachmentCount > 1
-                                ? attachmentCount + " documente"
+                                ? attachmentCount + " documents"
                                 : "📄 Document";
                         break;
                     case MIXED:
-                        lastMessageContent = "📎 " + attachmentCount + " atașamente";
+                        lastMessageContent = "📎 " + attachmentCount + " attachments";
                         break;
                 }
 

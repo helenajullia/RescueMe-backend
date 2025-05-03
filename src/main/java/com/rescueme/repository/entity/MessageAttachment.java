@@ -35,7 +35,6 @@ public class MessageAttachment {
     @Column(name = "file_size")
     private Long fileSize;
 
-    // Identificator pentru miniatura (pentru imagini)
     @Column(name = "has_thumbnail")
     private boolean hasThumbnail = false;
 

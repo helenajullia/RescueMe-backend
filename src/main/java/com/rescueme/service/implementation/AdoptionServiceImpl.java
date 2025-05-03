@@ -115,6 +115,12 @@ public class AdoptionServiceImpl implements AdoptionService {
                         otherRequest.setNotes("Another adopter has been selected for this pet.");
                         otherRequest.setResponseDate(LocalDateTime.now());
                         adoptionRequestRepository.save(otherRequest);
+
+                        notificationService.sendNotificationToAdopter(
+                                otherRequest.getUser().getId(),
+                                pet.getName(),
+                                false
+                        );
                     }
                 }
                 break;

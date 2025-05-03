@@ -19,9 +19,8 @@ public class MessageDTO {
     private LocalDateTime timestamp;
     private boolean read;
     private String conversationId;
-    private MessageType type = MessageType.TEXT; // Valoare implicită TEXT
+    private MessageType type = MessageType.TEXT;
 
-    // Atașamente
     private List<AttachmentDTO> attachments = new ArrayList<>();
 
     // Sender and recipient details
@@ -30,11 +29,10 @@ public class MessageDTO {
     private String recipientUsername;
     private String recipientProfilePicture;
 
-    // Tip de mesaj
     public enum MessageType {
-        TEXT,         // Mesaj text simplu
-        IMAGE,        // Mesaj cu imagine
-        DOCUMENT,     // Mesaj cu document
-        MIXED         // Mesaj cu mai multe atașamente
+        TEXT,         // text simplu
+        IMAGE,        // mesaj cu imagine
+        DOCUMENT,     // mesaj cu document
+        MIXED         // mesaj cu mai multe atasamente
     }
 }

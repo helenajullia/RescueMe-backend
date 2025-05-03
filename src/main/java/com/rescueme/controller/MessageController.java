@@ -28,12 +28,13 @@ public class MessageController {
     private final MessageService messageService;
     private final SimpMessagingTemplate messagingTemplate;
 
+
     /**
      * REST endpoint to send a message
      */
     @PostMapping("/send")
     public ResponseEntity<MessageDTO> sendMessage(@RequestBody MessageDTO messageDTO) {
-        log.info("🔄 REST message endpoint called with: {}", messageDTO);
+        log.info("REST message endpoint called with: {}", messageDTO);
         MessageDTO sent = messageService.sendMessage(messageDTO);
         return ResponseEntity.ok(sent);
     }
@@ -46,7 +47,7 @@ public class MessageController {
             @RequestPart("message") MessageDTO messageDTO,
             @RequestPart(value = "files", required = false) List<MultipartFile> files) {
 
-        log.info("🔄 REST message with attachments endpoint called: {}", messageDTO);
+        log.info("REST message with attachments endpoint called: {}", messageDTO);
 
         try {
             if (files == null || files.isEmpty()) {
@@ -56,27 +57,28 @@ public class MessageController {
             MessageDTO sent = messageService.sendMessageWithAttachments(messageDTO, files);
             return ResponseEntity.ok(sent);
         } catch (IOException e) {
-            log.error("Eroare la procesarea atașamentelor", e);
+            log.error("Error while processing attachments", e);
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "Eroare la procesarea atașamentelor: " + e.getMessage()));
+                    .body(Map.of("error", "Error while processing attachments: " + e.getMessage()));
         } catch (Exception e) {
-            log.error("Eroare neașteptată la trimiterea mesajului", e);
+            log.error("Unexpected error while sending the message", e);
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "Eroare la trimiterea mesajului: " + e.getMessage()));
+                    .body(Map.of("error", "Error while sending the message: " + e.getMessage()));
         }
     }
+
 
     /**
      * WebSocket endpoint to send a message
      */
     @MessageMapping("/chat.send")
     public void sendMessageWebSocket(@Payload MessageDTO messageDTO) {
-        log.info("⚡ WebSocket message received: {}", messageDTO);
+        log.info("WebSocket message received: {}", messageDTO);
         messageService.sendMessage(messageDTO);
-        // The actual sending is handled in the service
     }
+
 
     /**
      * Get all messages in a conversation
@@ -109,7 +111,7 @@ public class MessageController {
     public void markAsReadWebSocket(@Payload Map<String, Object> payload) {
         String conversationId = (String) payload.get("conversationId");
         Long userId = Long.valueOf(payload.get("userId").toString());
-        log.info("⚡ WebSocket mark as read received: {}, user: {}", conversationId, userId);
+        log.info("WebSocket mark as read received: {}, user: {}", conversationId, userId);
 
         messageService.markConversationAsRead(conversationId, userId);
     }
