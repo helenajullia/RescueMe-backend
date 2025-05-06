@@ -42,6 +42,12 @@ spring:
 jwt:
   secret: mySuperSecretKey1234567890123456789012345679
 
+stripe:
+  api:
+    key: sk_test_51PMAPoFShGT4VhrkFhZZDAo75tfPaW0fFoFv84ZCDcmwPomPWOjRnguiXZPhS7yRprH2qa88ykzKv5UDiTldiawQ00WHLXbyU1
+    publishable: pk_test_51PMAPoFShGT4VhrkhvsCFVXqOxPUBOOgsR3Lmh6ye38uiCYwpgvfBUeFqrADQ9xhnXlUEe41xRsi8WMh918AB1A500FvDbAA4d
+  webhook:
+    secret: whsec_d5846ac1207998671a57121d6f99bafbac6e6c13ea6c1a11198ad2883a77a60b
 
 cors:
   allowedOrigins: "http://localhost:5173"
