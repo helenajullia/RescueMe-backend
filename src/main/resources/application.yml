@@ -49,6 +49,7 @@ stripe:
   webhook:
     secret: whsec_d5846ac1207998671a57121d6f99bafbac6e6c13ea6c1a11198ad2883a77a60b
 
+
 cors:
   allowedOrigins: "http://localhost:5173"
   allowedMethods: "*"
