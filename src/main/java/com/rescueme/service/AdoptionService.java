@@ -17,10 +17,7 @@ public interface AdoptionService {
     List<AdoptionRequest> getPetAdoptionRequests(Long petId);
     AdoptionRequest updateAdoptionRequestStatus(String requestId, AdoptionRequestStatus status, String notes);
     void cancelAdoptionRequest(String requestId);
-
     AdoptionRequest completeAdoption(String requestId);
-
-    // New DTO-based methods
     AdoptionResponseDTO createAdoptionRequestDTO(AdoptionRequestDTO requestDTO);
     AdoptionResponseDTO getAdoptionRequestDTOById(String requestId);
     List<AdoptionResponseDTO> getUserAdoptionRequestDTOs(Long userId);

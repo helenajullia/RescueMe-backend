@@ -12,8 +12,6 @@ import java.util.List;
 @Repository
 public interface PetRepository extends JpaRepository<Pet, Long> {
 
-    int countByStatus(PetStatus petStatus);
-
     List<Pet> findByShelterId(Long shelterId);;
 
     int countByShelterIdAndStatus(Long shelterId, PetStatus status);
@@ -30,6 +28,4 @@ public interface PetRepository extends JpaRepository<Pet, Long> {
     int countByShelterIdAndUrgentAdoptionNeededTrue(Long shelterId);
 
     List<Pet> findByStatus(PetStatus status);
-
-
 }

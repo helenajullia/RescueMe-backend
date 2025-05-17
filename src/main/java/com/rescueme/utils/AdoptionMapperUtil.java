@@ -28,14 +28,4 @@ public class AdoptionMapperUtil {
 
         return dto;
     }
-
-    public static List<AdoptionResponseDTO> toDTOList(List<AdoptionRequest> adoptionRequests) {
-        if (adoptionRequests == null) {
-            return null;
-        }
-
-        return adoptionRequests.stream()
-                .map(AdoptionMapperUtil::toDTO)
-                .collect(Collectors.toList());
-    }
 }

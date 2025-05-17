@@ -4,7 +4,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.Map;
 
 public interface DocumentService {
-
     void uploadDocument(Long shelterId, String documentType, MultipartFile file);
     byte[] getDocument(Long shelterId, String documentType);
     String getDocumentContentType(Long shelterId, String documentType);

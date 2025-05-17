@@ -13,11 +13,7 @@ import java.util.Optional;
 @Repository
 public interface EventAttendeeRepository extends JpaRepository<EventAttendee, Long> {
 
-    List<EventAttendee> findByEventId(Long eventId);
-
     List<EventAttendee> findByUserId(Long userId);
-
-    List<EventAttendee> findByEventIdAndStatus(Long eventId, AttendanceStatus status);
 
     Optional<EventAttendee> findByEventIdAndUserId(Long eventId, Long userId);
 
@@ -26,6 +22,4 @@ public interface EventAttendeeRepository extends JpaRepository<EventAttendee, Lo
 
     @Query("SELECT COUNT(ea) FROM EventAttendee ea WHERE ea.event.id = :eventId")
     Long countByEventId(@Param("eventId") Long eventId);
-
-    void deleteByEventIdAndUserId(Long eventId, Long userId);
 }

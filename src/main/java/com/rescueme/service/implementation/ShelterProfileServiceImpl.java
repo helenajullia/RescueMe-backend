@@ -190,7 +190,6 @@ public class ShelterProfileServiceImpl implements ShelterProfileService {
             errors.append("Mission statement should be at least 50 characters long. ");
         }
 
-        // Check if all required documents are uploaded
         Map<String, Boolean> documentStatus = getDocumentStatus(shelter.getId());
         if (!documentStatus.get("taxCertificate")) {
             errors.append("Tax certificate document is required. ");

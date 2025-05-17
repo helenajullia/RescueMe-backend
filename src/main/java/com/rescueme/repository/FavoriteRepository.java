@@ -12,9 +12,8 @@ import java.util.Optional;
 @Repository
 public interface FavoriteRepository extends JpaRepository<Favorite, Long> {
     long countByUserId(Long userId);
-    List<Favorite> findByUserId(Long userId);
+    void deleteByUserIdAndPetId(Long userId, Long petId);
     Optional<Favorite> findByUserIdAndPetId(Long userId, Long petId);
     @Query("SELECT f.petId FROM Favorite f WHERE f.userId = :userId")
     List<Long> findPetIdsByUserId(@Param("userId") Long userId);
-    void deleteByUserIdAndPetId(Long userId, Long petId);
 }

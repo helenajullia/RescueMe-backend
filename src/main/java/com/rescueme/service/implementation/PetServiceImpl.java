@@ -117,15 +117,6 @@ public class PetServiceImpl implements PetService {
     }
 
 
-//    @Override
-//    public PetStatsDTO getPetStats() {
-//        int adoptedCount = petRepository.countByStatus(PetStatus.ADOPTED);
-//        int pendingCount = petRepository.countByStatus(PetStatus.PENDING);
-//        int availableCount = petRepository.countByStatus(PetStatus.AVAILABLE);
-//
-//        return new PetStatsDTO(adoptedCount, pendingCount, availableCount);
-//    }
-
 
     @Override
     public PetStatsDTO getPetStatsByShelter(Long shelterId) {

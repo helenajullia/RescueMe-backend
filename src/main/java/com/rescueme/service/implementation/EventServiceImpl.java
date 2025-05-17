@@ -35,7 +35,6 @@ public class EventServiceImpl implements EventService {
         User shelter = userRepository.findById(shelterId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Shelter not found"));
 
-        // Validate event dates
         if (event.getStartDateTime().isBefore(LocalDateTime.now())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Event start date cannot be in the past");
         }
@@ -44,7 +43,6 @@ public class EventServiceImpl implements EventService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Event end date must be after start date");
         }
 
-        // Validate fields
         if (event.getTitle() == null || event.getTitle().trim().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Event title is required");
         }
@@ -129,16 +127,6 @@ public class EventServiceImpl implements EventService {
     public Event updateEvent(Long eventId, Event eventDetails, Long shelterId) {
         Event existingEvent = validateEventOwnership(eventId, shelterId);
 
-        // Validate event dates
-//        if (eventDetails.getStartDateTime().isBefore(LocalDateTime.now())) {
-//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Event start date cannot be in the past");
-//        }
-//
-//        if (eventDetails.getEndDateTime().isBefore(eventDetails.getStartDateTime())) {
-//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Event end date must be after start date");
-//        }
-
-        // Update fields
         existingEvent.setTitle(eventDetails.getTitle());
         existingEvent.setDescription(eventDetails.getDescription());
         existingEvent.setStartDateTime(eventDetails.getStartDateTime());
@@ -159,7 +147,6 @@ public class EventServiceImpl implements EventService {
     public Event partialUpdateEvent(Long eventId, Map<String, Object> updates, Long shelterId) {
         Event existingEvent = validateEventOwnership(eventId, shelterId);
 
-        // Apply the partial updates
         updates.forEach((key, value) -> {
             switch (key) {
                 case "title":
@@ -190,7 +177,6 @@ public class EventServiceImpl implements EventService {
                     existingEvent.setCounty((String) value);
                     break;
 
-                // Handle date fields separately if they're sent as strings
                 default:
                     log.warn("Unknown field: {}", key);
             }
@@ -209,17 +195,14 @@ public class EventServiceImpl implements EventService {
     @Override
     @Transactional
     public void setAttendanceStatus(Long eventId, Long userId, AttendanceStatus status) {
-        // Verify the event exists
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "Event not found with ID: " + eventId));
 
-        // Verify the user exists
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "User not found with ID: " + userId));
 
-        // Check if a maximum attendee limit exists and if it's reached for GOING status
         if (status == AttendanceStatus.GOING && event.getMaxAttendees() != null) {
             Long goingCount = attendeeRepository.countByEventIdAndStatus(eventId, AttendanceStatus.GOING);
             if (goingCount >= event.getMaxAttendees()) {
@@ -228,16 +211,13 @@ public class EventServiceImpl implements EventService {
             }
         }
 
-        // Check if the user is already attending
         Optional<EventAttendee> existingAttendee = attendeeRepository.findByEventIdAndUserId(eventId, userId);
 
         if (existingAttendee.isPresent()) {
-            // Update the existing status
             EventAttendee attendee = existingAttendee.get();
             attendee.setStatus(status);
             attendeeRepository.save(attendee);
         } else {
-            // Create a new attendee record
             EventAttendee newAttendee = new EventAttendee();
             newAttendee.setEvent(event);
             newAttendee.setUser(user);
@@ -249,7 +229,6 @@ public class EventServiceImpl implements EventService {
     @Override
     @Transactional
     public void removeAttendanceStatus(Long eventId, Long userId) {
-        // Check if the user is attending
         Optional<EventAttendee> existingAttendee = attendeeRepository.findByEventIdAndUserId(eventId, userId);
 
         if (existingAttendee.isPresent()) {
@@ -262,7 +241,6 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public Map<String, Integer> getEventAttendanceCounts(Long eventId) {
-        // Verify the event exists
         if (!eventRepository.existsById(eventId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                     "Event not found with ID: " + eventId);
@@ -322,7 +300,6 @@ public class EventServiceImpl implements EventService {
     }
 
 
-    // Helper method to validate event ownership
     private Event validateEventOwnership(Long eventId, Long shelterId) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,

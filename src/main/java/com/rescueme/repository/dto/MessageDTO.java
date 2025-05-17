@@ -23,7 +23,6 @@ public class MessageDTO {
 
     private List<AttachmentDTO> attachments = new ArrayList<>();
 
-    // Sender and recipient details
     private String senderUsername;
     private String senderProfilePicture;
     private String recipientUsername;

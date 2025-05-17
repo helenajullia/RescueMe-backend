@@ -30,30 +30,31 @@ public class DocumentServiceImpl implements DocumentService {
     @Transactional
     public void uploadDocument(Long shelterId, String documentType, MultipartFile file) {
         if (shelterId == null || !isValidDocumentType(documentType) || file == null || file.isEmpty()) {
-            log.warn("Încercare de încărcare cu parametri invalizi: shelterId={}, documentType={}, file={}",
+            log.warn("Attempt to upload with invalid parameters: shelterId={}, documentType={}, file={}",
                     shelterId, documentType, file != null ? file.getOriginalFilename() : "null");
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Parametri invalizi pentru încărcarea documentului");
+                    "Invalid parameters for document upload");
         }
 
         if (file.getSize() > MAX_FILE_SIZE) {
-            log.warn("Dimensiunea fișierului depășește maximul permis: {} bytes", file.getSize());
+            log.warn("The file size exceeds the maximum allowed: {} bytes", file.getSize());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Dimensiunea fișierului depășește maximul permis (2MB)");
+                    "The file size exceeds the maximum allowed (2MB)");
         }
 
         String contentType = file.getContentType();
         if (!isValidContentType(contentType)) {
-            log.warn("Tip de fișier invalid: {}", contentType);
+            log.warn("Invalid file type: {}", contentType);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Tip de fișier invalid. Sunt acceptate doar fișiere PDF, JPEG și PNG");
+                    "Invalid file type. Only PDF, JPEG, and PNG files are accepted");
         }
 
         try {
-            log.debug("Încărcare document: {} pentru adăpostul: {}", documentType, shelterId);
-            log.debug("Numele original al fișierului: {}", file.getOriginalFilename());
-            log.debug("Tip conținut: {}", file.getContentType());
-            log.debug("Dimensiune fișier: {} bytes", file.getSize());
+            log.debug("Uploading document: {} for shelter: {}", documentType, shelterId);
+            log.debug("Original file name: {}", file.getOriginalFilename());
+            log.debug("Content type: {}", file.getContentType());
+            log.debug("File size: {} bytes", file.getSize());
+
 
             byte[] fileContent = file.getBytes();
 
@@ -61,15 +62,16 @@ public class DocumentServiceImpl implements DocumentService {
 
             Document document;
             if (existingDoc.isPresent()) {
-                log.debug("Actualizare document existent");
+                log.debug("Updating existing document");
                 document = existingDoc.get();
             } else {
-                log.debug("Creare document nou");
+                log.debug("Creating new document");
                 document = new Document();
                 document.setShelterId(shelterId);
                 document.setType(documentType);
                 document.setCreatedAt(LocalDateTime.now());
             }
+
 
             document.setContent(fileContent);
             document.setFileName(file.getOriginalFilename());
@@ -78,16 +80,16 @@ public class DocumentServiceImpl implements DocumentService {
             document.setFileSize(file.getSize());
 
             Document saved = documentRepository.save(document);
-            log.debug("Document salvat cu ID: {}", saved.getId());
+            log.debug("Document saved with ID: {}", saved.getId());
 
         } catch (IOException e) {
-            log.error("Eroare la citirea conținutului fișierului: {}", e.getMessage(), e);
+            log.error("Error reading file content: {}", e.getMessage(), e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Eroare la procesarea documentului: " + e.getMessage());
+                    "Error processing document: " + e.getMessage());
         } catch (Exception e) {
-            log.error("Eroare neașteptată la încărcarea documentului: {}", e.getMessage(), e);
+            log.error("Unexpected error while uploading document: {}", e.getMessage(), e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Eroare neașteptată la procesarea documentului");
+                    "Unexpected error while processing document");
         }
     }
 
@@ -127,27 +129,28 @@ public class DocumentServiceImpl implements DocumentService {
     public void deleteDocument(Long shelterId, String documentType) {
         if (!isValidDocumentType(documentType)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Tip de document invalid: " + documentType);
+                    "Invalid document type: " + documentType);
         }
 
         if (!documentRepository.findByShelterIdAndType(shelterId, documentType).isPresent()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "Documentul nu a fost găsit pentru adăpostul: " + shelterId + " și tipul: " + documentType);
+                    "Document not found for shelter: " + shelterId + " and type: " + documentType);
         }
 
         documentRepository.deleteByShelterIdAndType(shelterId, documentType);
-        log.debug("Document șters pentru adăpostul: {} și tipul: {}", shelterId, documentType);
+        log.debug("Document deleted for shelter: {} and type: {}", shelterId, documentType);
     }
 
 
     private Document findDocument(Long shelterId, String documentType) {
         return documentRepository.findByShelterIdAndType(shelterId, documentType)
                 .orElseThrow(() -> {
-                    log.warn("Document negăsit pentru adăpostul: {} și tipul: {}", shelterId, documentType);
+                    log.warn("Document not found for shelter: {} and type: {}", shelterId, documentType);
                     return new ResponseStatusException(HttpStatus.NOT_FOUND,
-                            "Document negăsit pentru adăpostul: " + shelterId + " și tipul: " + documentType);
+                            "Document not found for shelter: " + shelterId + " and type: " + documentType);
                 });
     }
+
 
     private boolean isValidDocumentType(String documentType) {
         return VALID_DOCUMENT_TYPES.contains(documentType);

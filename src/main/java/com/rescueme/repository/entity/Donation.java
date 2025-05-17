@@ -17,7 +17,7 @@ public class Donation {
     private Long id;
 
     @Column(name = "donor_id")
-    private Long donorId; // Poate fi null pentru donații anonime
+    private Long donorId;
 
     @Column(name = "shelter_id", nullable = false)
     private Long shelterId;
@@ -26,13 +26,13 @@ public class Donation {
     private Double amount;
 
     @Column(nullable = false)
-    private String currency = "RON"; // Implicit moneda românească
+    private String currency = "RON";
 
     @Column(name = "donation_date", nullable = false)
     private LocalDateTime donationDate;
 
     @Column(name = "transaction_id")
-    private String transactionId; // ID de la procesatorul de plăți
+    private String transactionId;
 
     @Column(name = "payment_status")
     @Enumerated(EnumType.STRING)
@@ -44,7 +44,6 @@ public class Donation {
     @Column(length = 500)
     private String message;
 
-    // Pre-persist pentru a seta automat data donației
     @PrePersist
     public void prePersist() {
         if (donationDate == null) {
@@ -52,7 +51,6 @@ public class Donation {
         }
     }
 
-    // Enum pentru statusul plății
     public enum PaymentStatus {
         PENDING,
         COMPLETED,

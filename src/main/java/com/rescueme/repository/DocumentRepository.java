@@ -12,8 +12,6 @@ import java.util.Optional;
 @Repository
 public interface DocumentRepository extends JpaRepository<Document, Long> {
     Optional<Document> findByShelterIdAndType(Long shelterId, String type);
-    List<Document> findByShelterId(Long shelterId);
-    List<Document> findByShelterIdAndTypeIn(Long shelterId, List<String> types);
     void deleteByShelterIdAndType(Long shelterId, String type);
     @Query("SELECT d.type FROM Document d WHERE d.shelterId = :shelterId")
     List<String> findDocumentTypesByShelter(@Param("shelterId") Long shelterId);

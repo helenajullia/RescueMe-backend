@@ -62,10 +62,6 @@ public class AuthService {
                 .isPresent();
     }
 
-    public boolean validateRefreshToken(String token) {
-        return isRefreshTokenValid(token);
-    }
-
     public String extractUsernameFromToken(String token) {
         return jwtUtil.extractUsername(token);
     }

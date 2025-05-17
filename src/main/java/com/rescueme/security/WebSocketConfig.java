@@ -13,7 +13,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        // Adaugă "/topic/chat" la canalele de broker
         config.enableSimpleBroker("/topic", "/queue", "/topic/chat", "/topic/read");
         config.setApplicationDestinationPrefixes("/app");
         config.setUserDestinationPrefix("/user");

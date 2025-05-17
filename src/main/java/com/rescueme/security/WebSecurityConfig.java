@@ -35,7 +35,18 @@ public class WebSecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors().configurationSource(corsConfigurationSource()).and()
                 .authorizeHttpRequests(auth -> auth
+                        // Rute publice
                         .requestMatchers("/ws/**").permitAll()
+                        .requestMatchers("/api/v1/auth/register/**").permitAll()
+                        .requestMatchers("/api/v1/auth/login").permitAll()
+                        .requestMatchers("/api/v1/auth/logout").permitAll()
+                        .requestMatchers("/api/v1/auth/refresh-token").permitAll()
+                        .requestMatchers("/api/v1/auth/check-email").permitAll()
+                        .requestMatchers("/api/v1/auth/check-username").permitAll()
+                        .requestMatchers("/api/v1/auth/request-reset").permitAll()
+                        .requestMatchers("/api/v1/auth/reset-password").permitAll()
+                        .requestMatchers("/api/v1/auth/change-password").permitAll()
+
                         .requestMatchers("/users/**").permitAll()
                         .requestMatchers("/pets/**").permitAll()
                         .requestMatchers("/pet-photos/**").permitAll()
@@ -49,15 +60,7 @@ public class WebSecurityConfig {
                         .requestMatchers("/api/v1/favorites/**").permitAll()
                         .requestMatchers("/api/v1/events/**").permitAll()
                         .requestMatchers("/api/v1/adoptions/**").permitAll()
-                        .requestMatchers("/api/v1/auth/register/**").permitAll()
-                        .requestMatchers("/api/v1/auth/login").permitAll()
-                        .requestMatchers("/api/v1/auth/logout").permitAll()
-                        .requestMatchers("/api/v1/auth/refresh-token").permitAll()
-                        .requestMatchers("/api/v1/auth/check-email").permitAll()
-                        .requestMatchers("/api/v1/auth/check-username").permitAll()
-                        .requestMatchers("/api/v1/auth/request-reset").permitAll()
-                        .requestMatchers("/api/v1/auth/reset-password").permitAll()
-                        .requestMatchers("/api/v1/auth/change-password").permitAll()
+
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));

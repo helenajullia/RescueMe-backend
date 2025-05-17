@@ -10,11 +10,8 @@ public interface PetPhotoService {
 
     void addPhotosToPet(Pet pet, List<MultipartFile> photos);
     void saveAllPhotos(List<PetPhoto> petPhotos);
-
     List<PetPhoto> getPhotosByPetId(Long petId);
     PetPhoto getPhotoById(Long photoId);
-
     void deletePhotosByPetId(Long petId);
-
     void deletePhotoById(Long photoId);
 }

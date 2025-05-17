@@ -45,9 +45,6 @@ public class UserServiceImpl implements UserService {
         user.setRole(Role.ADOPTER);
         user.setPhoneNumber(registerRequest.getPhoneNumber());
 
-//        user.setCounty(null);
-//        user.setCity(null);
-//        user.setShelterType(null);
 
         userRepository.save(user);
     }
@@ -69,7 +66,6 @@ public class UserServiceImpl implements UserService {
         User savedUser = userRepository.save(user);
         return savedUser.getId();
     }
-
 
 
     @Override
@@ -246,7 +242,6 @@ public class UserServiceImpl implements UserService {
     }
 
 
-
     @Override
     public User getShelterById(Long shelterId) {
         User shelter = userRepository.findById(shelterId)
@@ -258,6 +253,7 @@ public class UserServiceImpl implements UserService {
 
         return shelter;
     }
+
 
     public List<UserDTO> getAllShelters() {
         List<User> shelters = userRepository.findByRole(Role.SHELTER);

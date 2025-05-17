@@ -31,13 +31,9 @@ public class EventResponseDTO {
     private String shelterName;
     private String city;
     private String county;
-
-
-    // Attendance statistics
     private Integer interestedCount;
     private Integer goingCount;
 
-    // User's status for this event (if applicable)
     private AttendanceStatus userAttendanceStatus;
 
     public static EventResponseDTO fromEntity(Event event) {
@@ -60,18 +56,15 @@ public class EventResponseDTO {
         dto.setIsActive(event.getIsActive());
         dto.setCreatedAt(event.getCreatedAt());
 
-        // Set shelter information
         dto.setShelterId(event.getShelter().getId());
         dto.setShelterName(event.getShelter().getUsername());
 
-        // Calculate attendance counts
         Map<AttendanceStatus, Long> attendanceCounts = event.getAttendees().stream()
                 .collect(Collectors.groupingBy(EventAttendee::getStatus, Collectors.counting()));
 
         dto.setInterestedCount(attendanceCounts.getOrDefault(AttendanceStatus.INTERESTED, 0L).intValue());
         dto.setGoingCount(attendanceCounts.getOrDefault(AttendanceStatus.GOING, 0L).intValue());
 
-        // Set current user's attendance status if applicable
         if (currentUserId != null) {
             event.getAttendees().stream()
                     .filter(a -> a.getUser().getId().equals(currentUserId))
@@ -80,12 +73,6 @@ public class EventResponseDTO {
         }
 
         return dto;
-    }
-
-    public static List<EventResponseDTO> fromEntities(List<Event> events) {
-        return events.stream()
-                .map(EventResponseDTO::fromEntity)
-                .collect(Collectors.toList());
     }
 
     public static List<EventResponseDTO> fromEntities(List<Event> events, Long currentUserId) {

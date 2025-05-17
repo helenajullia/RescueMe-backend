@@ -12,26 +12,14 @@ import java.util.List;
 public interface PetService {
 
     List<PetResponseDTO> getAllPets();
-
     Pet addPet(Pet pet, User shelter, List<MultipartFile> photos);
-
-//    List<Pet> getPetsByShelter(User shelter);
-
     Pet getPetById(Long id);
-
     Pet updatePet(Long petId, Pet updatedPetData, Long shelterId, List<MultipartFile> newPhotos, List<Long> photoIdsToDelete);
-
-    public boolean deletePetByShelterId(Long shelterId, Long petId);
-
-    public List<PetResponseDTO> getPetsByShelterId(Long shelterId);
-
-//    PetStatsDTO getPetStats();
-
+    boolean deletePetByShelterId(Long shelterId, Long petId);
+    List<PetResponseDTO> getPetsByShelterId(Long shelterId);
     PetStatsDTO getPetStatsByShelter(Long shelterId);
     List<String> getAllBreeds();
     List<String> getBreedsBySpecies(String species);
-
     long countPetsByShelter(Long shelterId);
-
     List<PetResponseDTO> getPetsByStatus(PetStatus status);
 }

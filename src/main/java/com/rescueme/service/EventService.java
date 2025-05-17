@@ -31,8 +31,6 @@ public interface EventService {
     Event partialUpdateEvent(Long eventId, Map<String, Object> updates, Long shelterId);
 
     void deleteEvent(Long eventId, Long shelterId);
-
-    // User attendance methods
     void setAttendanceStatus(Long eventId, Long userId, AttendanceStatus status);
 
     void removeAttendanceStatus(Long eventId, Long userId);

@@ -38,7 +38,6 @@ public class AdoptionServiceImpl implements AdoptionService {
         Long userId = Long.valueOf(requestData.get("userId").toString());
         Long petId = Long.valueOf(requestData.get("petId").toString());
 
-        // Validate user exists
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
 
@@ -154,16 +153,13 @@ public class AdoptionServiceImpl implements AdoptionService {
                     "Cannot complete adoption that is not in APPROVED status. Current status: " + adoptionRequest.getStatus());
         }
 
-        // ✅ setezi statusul cererii ca COMPLETED
         adoptionRequest.setStatus(AdoptionRequestStatus.COMPLETED);
 
-        // ✅ setezi și statusul animalului ca ADOPTED
         Pet pet = adoptionRequest.getPet();
         pet.setStatus(PetStatus.ADOPTED);
 
-        // ✅ salvezi modificările
         petRepository.save(pet);
-        return adoptionRequestRepository.save(adoptionRequest); // << important!
+        return adoptionRequestRepository.save(adoptionRequest);
     }
 
 
@@ -219,8 +215,6 @@ public class AdoptionServiceImpl implements AdoptionService {
         AdoptionRequest savedRequest = adoptionRequestRepository.save(adoptionRequest);
 
         notificationService.sendNotificationToShelter(pet.getShelter().getId(), pet.getName());
-
-
 
         return convertToDTO(savedRequest);
     }

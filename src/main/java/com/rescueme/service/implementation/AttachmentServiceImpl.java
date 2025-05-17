@@ -30,20 +30,16 @@ public class AttachmentServiceImpl implements AttachmentService {
 
     private final MessageAttachmentRepository attachmentRepository;
 
-    // Dimensiunea maximă a fișierului (5MB)
-    private static final long MAX_FILE_SIZE = 5 * 1024 * 1024;
-
-    // Dimensiunea maximă a miniaturilor
+    private static final long MAX_FILE_SIZE = 5 * 1024 * 1024; //(5MB)
     private static final int THUMBNAIL_WIDTH = 200;
     private static final int THUMBNAIL_HEIGHT = 200;
 
     @Override
     @Transactional
     public MessageAttachment createAttachment(MultipartFile file, Long messageId) throws IOException {
-        // Verifică dimensiunea fișierului
         if (file.getSize() > MAX_FILE_SIZE) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Fișierul depășește dimensiunea maximă permisă (5MB)");
+                    "The file exceeds the maximum allowed size (5MB)");
         }
 
         MessageAttachment attachment = new MessageAttachment();
@@ -53,14 +49,13 @@ public class AttachmentServiceImpl implements AttachmentService {
         attachment.setFileSize(file.getSize());
         attachment.setFileData(file.getBytes());
 
-        // Generează miniatură pentru imagini
         if (file.getContentType() != null && file.getContentType().startsWith("image/")) {
             try {
                 byte[] thumbnail = generateThumbnail(file.getBytes());
                 attachment.setThumbnailData(thumbnail);
                 attachment.setHasThumbnail(true);
             } catch (Exception e) {
-                log.warn("Nu s-a putut genera miniatura pentru imaginea: {}", file.getOriginalFilename(), e);
+                log.warn("Failed to generate thumbnail for the image: {}", file.getOriginalFilename(), e);
                 attachment.setHasThumbnail(false);
             }
         }
@@ -85,7 +80,7 @@ public class AttachmentServiceImpl implements AttachmentService {
     public MessageAttachment getAttachment(Long attachmentId) {
         return attachmentRepository.findById(attachmentId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Atașament negăsit cu ID: " + attachmentId));
+                        "Attachment not found with ID: " + attachmentId));
     }
 
     @Override
@@ -115,7 +110,7 @@ public class AttachmentServiceImpl implements AttachmentService {
     public void deleteAttachment(Long attachmentId) {
         if (!attachmentRepository.existsById(attachmentId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "Atașament negăsit cu ID: " + attachmentId);
+                    "Attachment not found with ID: " + attachmentId);
         }
 
         attachmentRepository.deleteById(attachmentId);
@@ -126,7 +121,6 @@ public class AttachmentServiceImpl implements AttachmentService {
         ByteArrayInputStream bis = new ByteArrayInputStream(imageData);
         BufferedImage originalImage = ImageIO.read(bis);
 
-        // Calculează dimensiunile pentru a păstra raportul de aspect
         int originalWidth = originalImage.getWidth();
         int originalHeight = originalImage.getHeight();
 
@@ -140,14 +134,12 @@ public class AttachmentServiceImpl implements AttachmentService {
             width = (int) (height * aspectRatio);
         }
 
-        // Crează imaginea redimensionată
         BufferedImage thumbnailImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         Graphics2D g = thumbnailImage.createGraphics();
         g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
         g.drawImage(originalImage, 0, 0, width, height, null);
         g.dispose();
 
-        // Convertește imaginea înapoi în bytes
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         ImageIO.write(thumbnailImage, "jpg", bos);
 

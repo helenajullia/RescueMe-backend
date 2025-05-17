@@ -50,31 +50,25 @@ public class DonationServiceImpl implements DonationService {
     @Override
     @Transactional
     public Map<String, Object> createDonationIntent(DonationRequestDTO requestDTO) {
-        // Verifică dacă shelter-ul există
         User shelter = userRepository.findById(requestDTO.getShelterId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Shelter not found"));
 
-        // Verifică donatorul dacă nu este anonim
         if (!requestDTO.isAnonymous() && requestDTO.getUserId() != null) {
             userRepository.findById(requestDTO.getUserId())
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
         }
 
-        // Verifică suma
         if (requestDTO.getAmount() == null || requestDTO.getAmount() <= 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid donation amount");
         }
 
         try {
-            // Inițializează Stripe cu cheia API
             Stripe.apiKey = stripeApiKey;
 
-            // Convertește suma în cenți (Stripe folosește cea mai mică unitate monetară)
             long amountInCents = Math.round(requestDTO.getAmount() * 100);
 
-            // Creează un PaymentIntent cu suma și moneda
             PaymentIntentCreateParams createParams = PaymentIntentCreateParams.builder()
-                    .setCurrency("ron") // Codul monedei românești
+                    .setCurrency("ron")
                     .setAmount(amountInCents)
                     .setDescription("Donație către " + shelter.getUsername())
                     .putMetadata("shelter_id", shelter.getId().toString())
@@ -82,10 +76,8 @@ public class DonationServiceImpl implements DonationService {
                     .putMetadata("is_anonymous", String.valueOf(requestDTO.isAnonymous()))
                     .build();
 
-            // Creează intenția de plată
             PaymentIntent intent = PaymentIntent.create(createParams);
 
-            // Creează înregistrarea donației în stare de așteptare
             Donation donation = new Donation();
             donation.setShelterId(requestDTO.getShelterId());
             donation.setDonorId(requestDTO.isAnonymous() ? null : requestDTO.getUserId());
@@ -96,10 +88,8 @@ public class DonationServiceImpl implements DonationService {
             donation.setPaymentStatus(Donation.PaymentStatus.PENDING);
             donation.setDonationDate(LocalDateTime.now());
 
-            // Salvează donația
             donationRepository.save(donation);
 
-            // Returnează client secret și ID-ul donației
             Map<String, Object> response = new HashMap<>();
             response.put("clientSecret", intent.getClientSecret());
             response.put("donationId", donation.getId());
@@ -115,18 +105,14 @@ public class DonationServiceImpl implements DonationService {
     @Transactional
     public void processPaymentWebhook(String payload, String stripeSignature) {
         try {
-            // Verify the webhook signature
             Event event = Webhook.constructEvent(payload, stripeSignature, webhookSecret);
 
-            // Log the event type for debugging
             String eventType = event.getType();
             System.out.println("Received Stripe event: " + eventType);
 
-            // Extract and define transaction ID
             String finalTransactionId = null;
 
             if ("payment_intent.succeeded".equals(eventType)) {
-                // Get the data object directly from the JSON structure
                 JsonObject jsonObject = JsonParser.parseString(payload).getAsJsonObject()
                         .getAsJsonObject("data")
                         .getAsJsonObject("object");
@@ -136,7 +122,6 @@ public class DonationServiceImpl implements DonationService {
                     System.out.println("Extracted payment intent ID: " + finalTransactionId);
                 }
             } else if ("charge.succeeded".equals(eventType)) {
-                // Get the data object directly from the JSON structure
                 JsonObject jsonObject = JsonParser.parseString(payload).getAsJsonObject()
                         .getAsJsonObject("data")
                         .getAsJsonObject("object");
@@ -147,11 +132,9 @@ public class DonationServiceImpl implements DonationService {
                 }
             }
 
-            // Process the transaction if we have an ID
             if (finalTransactionId != null) {
                 System.out.println("Processing payment with transaction ID: " + finalTransactionId);
 
-                // Use a local final variable for the lambda
                 final String transactionId = finalTransactionId;
 
                 List<Donation> donations = donationRepository.findAll().stream()
@@ -166,7 +149,6 @@ public class DonationServiceImpl implements DonationService {
                     }
                 } else {
                     System.out.println("No donation found with transaction ID: " + transactionId);
-                    // Debug: print all transaction IDs in database
                     List<String> allIds = donationRepository.findAll().stream()
                             .map(Donation::getTransactionId)
                             .collect(Collectors.toList());
@@ -181,30 +163,14 @@ public class DonationServiceImpl implements DonationService {
         }
     }
 
-    private void updateDonationStatus(String transactionId, Donation.PaymentStatus status) {
-        // Găsește donația după ID-ul tranzacției
-        Donation donation = donationRepository.findAll().stream()
-                .filter(d -> transactionId.equals(d.getTransactionId()))
-                .findFirst()
-                .orElse(null);
-
-        // Actualizează statusul dacă donația a fost găsită
-        if (donation != null) {
-            donation.setPaymentStatus(status);
-            donationRepository.save(donation);
-        }
-    }
 
     @Override
     public List<DonationResponseDTO> getDonationsForShelter(Long shelterId) {
-        // Verifică dacă shelter-ul există
         User shelter = userRepository.findById(shelterId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Shelter not found"));
 
-        // Obține donațiile finalizate
         List<Donation> donations = donationRepository.findByShelterId(shelterId);
 
-        // Convertește în DTO-uri cu numele shelter-ului și donatorului
         return donations.stream().map(donation -> {
             String donorName = null;
             if (!donation.isAnonymous() && donation.getDonorId() != null) {
@@ -212,7 +178,7 @@ public class DonationServiceImpl implements DonationService {
                         .map(User::getUsername)
                         .orElse("Unknown");
             } else {
-                donorName = "Anonymous"; // Explicitly set anonymous name
+                donorName = "Anonymous";
             }
 
             return DonationResponseDTO.fromEntity(donation, shelter.getUsername(), donorName);
@@ -221,14 +187,11 @@ public class DonationServiceImpl implements DonationService {
 
     @Override
     public List<DonationResponseDTO> getDonationsForUser(Long userId) {
-        // Verifică dacă utilizatorul există
         userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-        // Obține donațiile făcute de acest utilizator
         List<Donation> donations = donationRepository.findByDonorId(userId);
 
-        // Convertește în DTO-uri cu numele shelter-urilor
         return donations.stream().map(donation -> {
             String shelterName = userRepository.findById(donation.getShelterId())
                     .map(User::getUsername)
@@ -240,20 +203,16 @@ public class DonationServiceImpl implements DonationService {
 
     @Override
     public Map<String, Object> getDonationStatistics(Long shelterId) {
-        // Verifică shelter-ul
         userRepository.findById(shelterId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Shelter not found"));
 
         Map<String, Object> stats = new HashMap<>();
 
-        // Număr total de donații
         stats.put("totalDonations", donationRepository.countByShelterId(shelterId));
 
-        // Suma totală strânsă
         Double totalAmount = donationRepository.getTotalDonationAmountForShelter(shelterId);
         stats.put("totalAmountRaised", totalAmount != null ? totalAmount : 0.0);
 
-        // Donații recente (ultimele 5)
         List<DonationResponseDTO> recentDonations = donationRepository.findRecentDonationsForShelter(shelterId, 5)
                 .stream()
                 .map(donation -> {
