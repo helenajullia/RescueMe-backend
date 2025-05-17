@@ -45,9 +45,9 @@ public class UserServiceImpl implements UserService {
         user.setRole(Role.ADOPTER);
         user.setPhoneNumber(registerRequest.getPhoneNumber());
 
-        user.setCounty(null);
-        user.setCity(null);
-        user.setShelterType(null);
+//        user.setCounty(null);
+//        user.setCity(null);
+//        user.setShelterType(null);
 
         userRepository.save(user);
     }

@@ -30,13 +30,19 @@ public class PetController {
 
     }
 
+    /**
+     * Returns a list of all pets in the system
+     */
     @GetMapping("/all")
     public ResponseEntity<List<PetResponseDTO>> getAllPets() {
         List<PetResponseDTO> allPets = petService.getAllPets();
         return ResponseEntity.ok(allPets);
     }
 
-
+    /**
+     * Adds a new pet to the shelter's profile
+     * Accepts multipart form data with pet info and optional photos
+     */
     @PostMapping(value = "/add", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<PetResponseDTO> addPet(
             @RequestPart("petData") String petDataString,
@@ -58,14 +64,19 @@ public class PetController {
         }
     }
 
-
+    /**
+     * Returns all pets belonging to a specific shelter
+     */
     @GetMapping("/{shelterId}")
     public ResponseEntity<List<PetResponseDTO>> getPetsByShelterId(@PathVariable Long shelterId) {
         List<PetResponseDTO> pets = petService.getPetsByShelterId(shelterId);
         return ResponseEntity.ok(pets);
     }
 
-
+    /**
+     * Deletes a pet by its ID and shelter ID
+     * Only allowed if the pet belongs to the shelter
+     */
     @DeleteMapping("/{shelterId}/delete/{petId}")
     public ResponseEntity<String> deletePet(@PathVariable Long shelterId, @PathVariable Long petId) {
         if (petService.deletePetByShelterId(shelterId, petId)) {
@@ -75,6 +86,10 @@ public class PetController {
         }
     }
 
+    /**
+     * Updates a pet by ID
+     * Accepts partial updates, new photos, and photo IDs to delete
+     */
     @PatchMapping(value = "/update/{petId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> updatePet(
             @PathVariable Long petId,
@@ -101,40 +116,48 @@ public class PetController {
         }
     }
 
-
-//    @GetMapping("/stats")
-//    public PetStatsDTO getPetStats() {
-//        return petService.getPetStats();
-//    }
-
+    /**
+     * Returns pet statistics for a specific shelter
+     */
     @GetMapping("/stats/{shelterId}")
     public ResponseEntity<PetStatsDTO> getPetStatsByShelter(@PathVariable Long shelterId) {
         PetStatsDTO stats = petService.getPetStatsByShelter(shelterId);
         return ResponseEntity.ok(stats);
     }
 
+    /**
+     * Returns a list of all unique breeds from all pets
+     */
     @GetMapping("/breeds")
     public ResponseEntity<List<String>> getBreeds() {
         List<String> breeds = petService.getAllBreeds();
         return ResponseEntity.ok(breeds);
     }
 
+    /**
+     * Returns all breeds for a specific species (Dog or Cat)
+     */
     @GetMapping("/breedsBySpecies")
     public ResponseEntity<List<String>> getBreeds(@RequestParam String species) {
         List<String> breeds = petService.getBreedsBySpecies(species);
         return ResponseEntity.ok(breeds);
     }
 
+    /**
+     * Returns the number of pets owned by a specific shelter
+     */
     @GetMapping("/count/{shelterId}")
     public ResponseEntity<Long> getPetCountByShelter(@PathVariable Long shelterId) {
         long petCount = petService.countPetsByShelter(shelterId);
         return ResponseEntity.ok(petCount);
     }
 
+    /**
+     * Returns all pets that are currently available for adoption
+     */
     @GetMapping("/available")
     public ResponseEntity<List<PetResponseDTO>> getAllAvailablePets() {
         List<PetResponseDTO> pets = petService.getPetsByStatus(PetStatus.AVAILABLE);
         return ResponseEntity.ok(pets);
     }
-
 }

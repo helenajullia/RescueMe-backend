@@ -22,26 +22,25 @@ public class AttachmentController {
     private final MessageService messageService;
 
     /**
-     * Obține informații despre un atașament
+     * Returns attachment info without including the file data or thumbnail
      */
     @GetMapping("/{attachmentId}/info")
     public ResponseEntity<AttachmentDTO> getAttachmentInfo(@PathVariable Long attachmentId) {
         try {
             AttachmentDTO attachmentDTO = attachmentService.getAttachmentDTO(attachmentId);
-            // Excludem conținutul binar
             attachmentDTO.setFileData(null);
             attachmentDTO.setThumbnailData(null);
             return ResponseEntity.ok(attachmentDTO);
         } catch (ResponseStatusException e) {
             return ResponseEntity.status(e.getStatusCode()).build();
         } catch (Exception e) {
-            log.error("Eroare la obținerea informațiilor atașamentului", e);
+            log.error("Error retrieving attachment information", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
     /**
-     * Descarcă conținutul unui atașament
+     * Returns the binary content of an attachment for downloading
      */
     @GetMapping("/{attachmentId}/download")
     public ResponseEntity<byte[]> downloadAttachment(@PathVariable Long attachmentId) {
@@ -59,13 +58,13 @@ public class AttachmentController {
         } catch (ResponseStatusException e) {
             return ResponseEntity.status(e.getStatusCode()).build();
         } catch (Exception e) {
-            log.error("Eroare la descărcarea atașamentului", e);
+            log.error("Error downloading the attachment", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
     /**
-     * Obține miniatura unui atașament (pentru imagini)
+     * Returns the thumbnail image of an attachment as JPEG
      */
     @GetMapping("/{attachmentId}/thumbnail")
     public ResponseEntity<byte[]> getAttachmentThumbnail(@PathVariable Long attachmentId) {
@@ -78,13 +77,13 @@ public class AttachmentController {
         } catch (ResponseStatusException e) {
             return ResponseEntity.status(e.getStatusCode()).build();
         } catch (Exception e) {
-            log.error("Eroare la obținerea miniaturii atașamentului", e);
+            log.error("Error retrieving attachment thumbnail", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
     /**
-     * Șterge un atașament
+     * Deletes an attachment with the specified ID
      */
     @DeleteMapping("/{attachmentId}")
     public ResponseEntity<Void> deleteAttachment(@PathVariable Long attachmentId) {
@@ -94,7 +93,7 @@ public class AttachmentController {
         } catch (ResponseStatusException e) {
             return ResponseEntity.status(e.getStatusCode()).build();
         } catch (Exception e) {
-            log.error("Eroare la ștergerea atașamentului", e);
+            log.error("Error deleting the attachment", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }

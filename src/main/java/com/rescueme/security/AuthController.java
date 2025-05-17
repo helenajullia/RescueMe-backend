@@ -28,12 +28,14 @@ import java.util.UUID;
 public class AuthController {
     private final UserService userService;
     private final AuthService authService;
-    private final JwtUtil jwtUtil;
     private final EmailService emailService;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final Map<String, String> resetTokens = new HashMap<>();
 
+    /**
+     * Registers a new adopter account
+     */
     @PostMapping("/register/adopter")
     public ResponseEntity<Map<String, String>> registerAdopter(@RequestBody AdopterRegisterRequest registerRequest) {
         userService.addAdopter(registerRequest);
@@ -42,6 +44,9 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    /**
+     * Registers a new shelter account and returns the assigned shelter ID
+     */
     @PostMapping("/register/shelter")
     public ResponseEntity<Map<String, Object>> registerShelter(@RequestBody ShelterRegisterRequest registerRequest) {
         Long Id = userService.addShelter(registerRequest);
@@ -53,6 +58,9 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    /**
+     * Logs in a user and sets JWT access and refresh tokens as secure cookies
+     */
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request, HttpServletResponse response) {
         LoginResponse loginResponse = authService.login(request);
@@ -78,7 +86,9 @@ public class AuthController {
         return ResponseEntity.ok(loginResponse);
     }
 
-
+    /**
+     * Logs out the user by removing access and refresh tokens from cookies and revoking the refresh token
+     */
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response,
                                     @CookieValue(value = "refreshToken", required = false) String refreshToken) {
@@ -107,6 +117,9 @@ public class AuthController {
         return ResponseEntity.ok("Logout successful");
     }
 
+    /**
+     * Refreshes the access token using a valid refresh token from the cookie
+     */
     @PostMapping("/refresh-token")
     public ResponseEntity<?> refreshToken(@CookieValue(value = "refreshToken", required = false) String refreshToken,
                                           HttpServletResponse response) {
@@ -132,7 +145,9 @@ public class AuthController {
         return ResponseEntity.ok(Map.of("message", "Access token refreshed"));
     }
 
-
+    /**
+     * Checks whether the given email address is already registered
+     */
     @GetMapping("/check-email")
     public ResponseEntity<Map<String, Object>> checkEmailExists(@RequestParam String email) {
         boolean exists = userService.emailExists(email);
@@ -141,6 +156,9 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * Checks whether the given username is already taken
+     */
     @GetMapping("/check-username")
     public ResponseEntity<Map<String, Object>> checkUsernameExists(@RequestParam String username) {
         boolean exists = userService.usernameExists(username);
@@ -149,6 +167,9 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * Sends a password reset email with a unique token to the user
+     */
     @PostMapping("/request-reset")
     public ResponseEntity<Map<String, String>> requestPasswordReset(@RequestBody Map<String, String> request) {
         String email = request.get("email");
@@ -174,7 +195,9 @@ public class AuthController {
         return ResponseEntity.ok(Map.of("message", "Password reset email sent!"));
     }
 
-
+    /**
+     * Resets the password using a valid token previously sent via email
+     */
     @PostMapping("/reset-password")
     public ResponseEntity<Map<String, String>> resetPassword(@RequestBody Map<String, String> payload) {
         String token = payload.get("token");

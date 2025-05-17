@@ -25,42 +25,61 @@ public class AdminDashboardController {
     private final AdminDashboardService adminDashboardService;
     private final UserService userService;
 
-    private final UserRepository userRepository;
-
+    /**
+     * Returns the total number of shelters
+     */
     @GetMapping("/shelters/count")
     public ResponseEntity<Long> getTotalSheltersCount() {
         return ResponseEntity.ok(adminDashboardService.getTotalSheltersCount());
     }
 
+    /**
+     * Returns the number of shelters that are pending admin approval
+     */
     @GetMapping("/shelters/pending/count")
     public ResponseEntity<Long> getPendingSheltersCount() {
         return ResponseEntity.ok(adminDashboardService.getPendingSheltersCount());
     }
 
+    /**
+     * Returns the total number of users (both shelters and adopters)
+     */
     @GetMapping("/users/count")
     public ResponseEntity<Long> getTotalUsersCount() {
         return ResponseEntity.ok(adminDashboardService.getTotalUsersCount());
     }
 
+    /**
+     * Returns the total number of pets listed
+     */
     @GetMapping("/pets/count")
     public ResponseEntity<Long> getTotalPetsCount() {
         return ResponseEntity.ok(adminDashboardService.getTotalPetsCount());
     }
 
+    /**
+     * Returns a list of shelters that are waiting for admin approval
+     */
     @GetMapping("/shelters/pending")
     public ResponseEntity<List<User>> getPendingShelters() {
         return ResponseEntity.ok(adminDashboardService.getPendingShelters());
     }
 
+    /**
+     * Returns a list of shelters that have already been approved
+     */
     @GetMapping("/shelters/approved")
     public ResponseEntity<List<User>> getApprovedShelters() {
         return ResponseEntity.ok(adminDashboardService.getApprovedShelters());
     }
 
+    /**
+     * Approves a shelter by its ID
+     * Updates the shelter's status to APPROVED, sets the approval time,
+     * and flags firstLoginAfterApproval
+     */
     @PostMapping("/shelters/{shelterId}/approve")
     public ResponseEntity<Map<String, Object>> approveShelter(@PathVariable Long shelterId) {
-        User shelter = userService.getShelterById(shelterId);
-
         Map<String, Object> updates = new HashMap<>();
         updates.put("status", ShelterStatus.APPROVED);
         updates.put("approvedAt", LocalDateTime.now());
@@ -75,6 +94,10 @@ public class AdminDashboardController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * Rejects a shelter by its ID
+     * Updates the shelter's status to REJECTED
+     */
     @PostMapping("/shelters/{shelterId}/reject")
     public ResponseEntity<Map<String, String>> rejectShelter(@PathVariable Long shelterId) {
         User shelter = userService.getShelterById(shelterId);

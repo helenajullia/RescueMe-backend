@@ -18,7 +18,8 @@ public class DonationController {
     private final DonationService donationService;
 
     /**
-     * Endpoint pentru crearea intenției de donație
+     * Creates a Stripe donation payment intent based on the request data
+     * Returns client secret and metadata used for frontend payment processing
      */
     @PostMapping("/create-intent")
     public ResponseEntity<Map<String, Object>> createDonationIntent(@RequestBody DonationRequestDTO requestDTO) {
@@ -27,7 +28,8 @@ public class DonationController {
     }
 
     /**
-     * Endpoint pentru primirea webhook-urilor de la Stripe
+     * Handles Stripe webhook events to confirm or update donation status
+     * Verifies the event signature and processes it accordingly
      */
     @PostMapping("/webhook")
     public ResponseEntity<String> handleStripeWebhook(
@@ -38,7 +40,7 @@ public class DonationController {
     }
 
     /**
-     * Endpoint pentru obținerea donațiilor unui shelter
+     * Returns a list of all donations received by the given shelter
      */
     @GetMapping("/shelter/{shelterId}")
     public ResponseEntity<List<DonationResponseDTO>> getDonationsForShelter(@PathVariable Long shelterId) {
@@ -47,7 +49,7 @@ public class DonationController {
     }
 
     /**
-     * Endpoint pentru obținerea donațiilor unui utilizator
+     * Returns a list of all donations made by a specific user
      */
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<DonationResponseDTO>> getDonationsForUser(@PathVariable Long userId) {
@@ -56,7 +58,7 @@ public class DonationController {
     }
 
     /**
-     * Endpoint pentru obținerea statisticilor despre donații
+     * Returns donation statistics for a given shelter
      */
     @GetMapping("/statistics/{shelterId}")
     public ResponseEntity<Map<String, Object>> getDonationStatistics(@PathVariable Long shelterId) {

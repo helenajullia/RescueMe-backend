@@ -25,32 +25,45 @@ public class UserController {
     private final UserService userService;
     private final PetService petService;
 
+    /**
+     * Returns user details by user ID
+     */
     @GetMapping("/{userId}")
     public ResponseEntity<User> getUserById(@PathVariable Long userId) {
         User user = userService.getUserById(userId);
         return ResponseEntity.ok(user);
     }
 
-
+    /**
+     * Returns a list of all users in the system
+     */
     @GetMapping("/all")
     public ResponseEntity<List<User>> getAllUsers() {
         List<User> users = userService.getAllUsers();
         return ResponseEntity.ok(users);
     }
 
-
+    /**
+     * Deletes a user by their ID
+     */
     @DeleteMapping("/{userId}")
     public ResponseEntity<String> deleteUser(@PathVariable Long userId) {
         userService.deleteUserById(userId);
         return ResponseEntity.ok("User deleted successfully");
     }
 
+    /**
+     * Updates a user by their ID
+     */
     @PatchMapping("/{userId}")
     public ResponseEntity<User> updateUser(@PathVariable Long userId, @RequestBody Map<String, Object> updates) {
         User updatedUser = userService.updateUser(userId, updates);
         return ResponseEntity.ok(updatedUser);
     }
 
+    /**
+     * Uploads a profile picture for the user
+     */
     @PostMapping("/{id}/uploadProfilePicture")
     public ResponseEntity<String> uploadProfilePicture(
             @PathVariable Long id,
@@ -59,6 +72,9 @@ public class UserController {
         return ResponseEntity.ok("Profile picture uploaded successfully");
     }
 
+    /**
+     * Returns the profile picture for the user in JPEG format
+     */
     @GetMapping("/{id}/profilePicture")
     public ResponseEntity<byte[]> getProfilePicture(@PathVariable Long id) {
         byte[] image = userService.getProfilePicture(id);
@@ -72,12 +88,18 @@ public class UserController {
                 .body(image);
     }
 
+    /**
+     * Deletes the profile picture of the user
+     */
     @DeleteMapping("/{id}/profilePicture")
     public ResponseEntity<String> deleteProfilePicture(@PathVariable Long id) {
         userService.deleteProfilePicture(id);
         return ResponseEntity.ok("Profile picture deleted successfully");
     }
 
+    /**
+     * Changes the password of a user given the current and new password
+     */
     @PatchMapping("/{userId}/change-password")
     public ResponseEntity<?> changePassword(@PathVariable Long userId, @RequestBody Map<String, String> passwords) {
         try {
@@ -90,33 +112,39 @@ public class UserController {
         }
     }
 
+    /**
+     * Returns shelter information by ID
+     */
     @GetMapping("/shelter/{shelterId}")
     public ResponseEntity<User> getShelterById(@PathVariable Long shelterId) {
         User shelter = userService.getShelterById(shelterId);
         return ResponseEntity.ok(shelter);
     }
 
+    /**
+     * Returns a list of all shelters as UserDTOs
+     */
     @GetMapping("/shelters")
     public ResponseEntity<List<UserDTO>> getAllShelters() {
         List<UserDTO> shelters = userService.getAllShelters();
         return ResponseEntity.ok(shelters);
     }
 
+    /**
+     * Returns the shelter that owns a specific pet
+     */
     @GetMapping("/shelter/by-pet/{petId}")
     public ResponseEntity<User> getShelterByPetId(@PathVariable Long petId) {
         try {
-            // Get the pet
             Pet pet = petService.getPetById(petId);
             if (pet == null) {
                 return ResponseEntity.notFound().build();
             }
 
-            // Get the shelter from the pet
             User shelter = pet.getShelter();
             return ResponseEntity.ok(shelter);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-
 }

@@ -22,6 +22,10 @@ public class ShelterProfileController {
     private final ShelterProfileService shelterProfileService;
     private final UserService userService;
 
+    /**
+     * Returns the public and internal profile details of a shelter by ID
+     * Also includes the status of required documents
+     */
     @GetMapping("/{shelterId}/profile")
     public ResponseEntity<Map<String, Object>> getShelterProfile(@PathVariable Long shelterId) {
         User shelter = userService.getShelterById(shelterId);
@@ -47,7 +51,9 @@ public class ShelterProfileController {
         return ResponseEntity.ok(response);
     }
 
-
+    /**
+     * Saves a draft version of the shelter's profile without submitting it for review
+     */
     @PatchMapping("/{shelterId}/profile/draft")
     public ResponseEntity<?> saveShelterProfileDraft(
             @PathVariable Long shelterId,
@@ -62,6 +68,9 @@ public class ShelterProfileController {
         }
     }
 
+    /**
+     * Submits the final version of the shelter's profile for admin review
+     */
     @PatchMapping("/{shelterId}/profile/submit")
     public ResponseEntity<?> submitShelterProfile(
             @PathVariable Long shelterId,
@@ -77,6 +86,9 @@ public class ShelterProfileController {
     }
 
 
+    /**
+     * Checks if the welcome modal should be shown after shelter approval
+     */
     @GetMapping("/{shelterId}/check-welcome")
     public ResponseEntity<Map<String, Boolean>> checkWelcomeStatus(@PathVariable Long shelterId) {
         User shelter = userService.getShelterById(shelterId);
@@ -87,7 +99,9 @@ public class ShelterProfileController {
         return ResponseEntity.ok(response);
     }
 
-
+    /**
+     * Marks the welcome screen as acknowledged so it will not be shown again
+     */
     @PostMapping("/{shelterId}/acknowledge-welcome")
     public ResponseEntity<?> acknowledgeWelcome(@PathVariable Long shelterId) {
         Map<String, Object> updates = new HashMap<>();

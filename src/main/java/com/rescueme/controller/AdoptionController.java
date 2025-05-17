@@ -7,7 +7,6 @@ import com.rescueme.repository.entity.AdoptionRequestStatus;
 import com.rescueme.service.AdoptionService;
 import com.rescueme.utils.AdoptionMapperUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +22,9 @@ public class AdoptionController {
 
     private final AdoptionService adoptionService;
 
+    /**
+     * Creates a new adoption request based on the data from the adopter
+     */
     @PostMapping("/requests")
     public ResponseEntity<AdoptionResponseDTO> createAdoptionRequest(@RequestBody AdoptionRequestDTO requestDTO) {
         try {
@@ -35,6 +37,9 @@ public class AdoptionController {
         }
     }
 
+    /**
+     * Returns the adoption request with the given ID
+     */
     @GetMapping("/requests/{requestId}")
     public ResponseEntity<AdoptionResponseDTO> getAdoptionRequest(@PathVariable String requestId) {
         try {
@@ -45,24 +50,36 @@ public class AdoptionController {
         }
     }
 
+    /**
+     * Returns all adoption requests made by a specific user
+     */
     @GetMapping("/requests/user/{userId}")
     public ResponseEntity<List<AdoptionResponseDTO>> getUserAdoptionRequests(@PathVariable Long userId) {
         List<AdoptionResponseDTO> requests = adoptionService.getUserAdoptionRequestDTOs(userId);
         return ResponseEntity.ok(requests);
     }
 
+    /**
+     * Returns all adoption requests received by a specific shelter
+     */
     @GetMapping("/requests/shelter/{shelterId}")
     public ResponseEntity<List<AdoptionResponseDTO>> getShelterAdoptionRequests(@PathVariable Long shelterId) {
         List<AdoptionResponseDTO> requests = adoptionService.getShelterAdoptionRequestDTOs(shelterId);
         return ResponseEntity.ok(requests);
     }
 
+    /**
+     * Returns all adoption requests for a specific pet
+     */
     @GetMapping("/requests/pet/{petId}")
     public ResponseEntity<List<AdoptionResponseDTO>> getPetAdoptionRequests(@PathVariable Long petId) {
         List<AdoptionResponseDTO> requests = adoptionService.getPetAdoptionRequestDTOs(petId);
         return ResponseEntity.ok(requests);
     }
 
+    /**
+     * Updates the status and optional notes for an adoption request
+     */
     @PatchMapping("/requests/{requestId}")
     public ResponseEntity<AdoptionResponseDTO> updateAdoptionRequestStatus(
             @PathVariable String requestId,
@@ -88,6 +105,9 @@ public class AdoptionController {
         }
     }
 
+    /**
+     * Cancels an existing adoption request
+     */
     @DeleteMapping("/requests/{requestId}")
     public ResponseEntity<Void> cancelAdoptionRequest(@PathVariable String requestId) {
         try {
@@ -100,11 +120,13 @@ public class AdoptionController {
         }
     }
 
+    /**
+     * Marks an adoption request as completed and finalizes the adoption
+     */
     @PostMapping("/requests/{requestId}/complete")
     public ResponseEntity<AdoptionResponseDTO> completeAdoption(@PathVariable String requestId) {
         try {
             AdoptionRequest completedRequest = adoptionService.completeAdoption(requestId);
-            // Folosește metoda statică direct
             AdoptionResponseDTO response = AdoptionMapperUtil.toDTO(completedRequest);
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {

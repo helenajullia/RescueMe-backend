@@ -10,12 +10,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -26,11 +24,11 @@ import java.util.Map;
 public class MessageController {
 
     private final MessageService messageService;
-    private final SimpMessagingTemplate messagingTemplate;
 
 
     /**
-     * REST endpoint to send a message
+     * Sends a message using REST
+     * Acts as a fallback if WebSocket is not available
      */
     @PostMapping("/send")
     public ResponseEntity<MessageDTO> sendMessage(@RequestBody MessageDTO messageDTO) {
@@ -40,7 +38,8 @@ public class MessageController {
     }
 
     /**
-     * REST endpoint to send a message with attachments
+     * Sends a message with attachments using REST
+     * Acts as a fallback if WebSocket is not available
      */
     @PostMapping(value = "/send-with-attachments", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> sendMessageWithAttachments(
@@ -69,7 +68,6 @@ public class MessageController {
         }
     }
 
-
     /**
      * WebSocket endpoint to send a message
      */
@@ -79,9 +77,8 @@ public class MessageController {
         messageService.sendMessage(messageDTO);
     }
 
-
     /**
-     * Get all messages in a conversation
+     * Returns all messages in a given conversation
      */
     @GetMapping("/conversation/{conversationId}")
     public ResponseEntity<List<MessageDTO>> getConversationMessages(
@@ -93,7 +90,8 @@ public class MessageController {
     }
 
     /**
-     * Mark all messages in a conversation as read for a user
+     * Marks all messages in a conversation as read for a specific user using REST
+     * Acts as fallback when WebSocket is not available
      */
     @PostMapping("/conversation/{conversationId}/read")
     public ResponseEntity<Void> markConversationAsRead(
@@ -117,7 +115,7 @@ public class MessageController {
     }
 
     /**
-     * Get all conversations for a user
+     * Returns all conversations a user is part of
      */
     @GetMapping("/conversations/{userId}")
     public ResponseEntity<List<ConversationDTO>> getUserConversations(@PathVariable Long userId) {
@@ -126,7 +124,7 @@ public class MessageController {
     }
 
     /**
-     * Get unread messages count for a user
+     * Returns the number of unread messages for a specific user
      */
     @GetMapping("/unread/{userId}")
     public ResponseEntity<Long> getUnreadMessagesCount(@PathVariable Long userId) {
@@ -135,7 +133,8 @@ public class MessageController {
     }
 
     /**
-     * Get a conversation ID for two users
+     * Returns a conversation ID between two users
+     * Used for identifying or creating a conversation between users
      */
     @GetMapping("/conversation-id")
     public ResponseEntity<Map<String, String>> getConversationId(

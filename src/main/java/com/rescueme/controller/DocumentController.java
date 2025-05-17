@@ -21,6 +21,9 @@ public class DocumentController {
 
     private final DocumentService documentService;
 
+    /**
+     * Uploads a document for the specified shelter and document type
+     */
     @PostMapping("/{shelterId}/documents/{documentType}")
     public ResponseEntity<?> uploadDocument(
             @PathVariable Long shelterId,
@@ -28,34 +31,36 @@ public class DocumentController {
             @RequestParam("file") MultipartFile file) {
 
         try {
-            log.info("Cerere de încărcare document primită pentru adăpostul: {} și tipul: {}",
+            log.info("Document upload request received for shelter: {} and type: {}",
                     shelterId, documentType);
 
             documentService.uploadDocument(shelterId, documentType, file);
 
-            log.info("Document încărcat cu succes pentru adăpostul: {} și tipul: {}",
+            log.info("Document successfully uploaded for shelter: {} and type: {}",
                     shelterId, documentType);
 
-            return ResponseEntity.ok(Collections.singletonMap("message", "Document încărcat cu succes"));
+            return ResponseEntity.ok(Collections.singletonMap("message", "Document successfully uploaded"));
         } catch (ResponseStatusException e) {
-            log.warn("Eroare la încărcarea documentului: {}", e.getReason());
+            log.warn("Error uploading document: {}", e.getReason());
             return ResponseEntity.status(e.getStatusCode())
                     .body(Collections.singletonMap("message", e.getReason()));
         } catch (Exception e) {
-            log.error("Eroare neașteptată la încărcarea documentului", e);
+            log.error("Unexpected error occurred while uploading the document", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Collections.singletonMap("message", "Eroare la încărcarea documentului: " + e.getMessage()));
+                    .body(Collections.singletonMap("message", "Error uploading document: " + e.getMessage()));
         }
     }
 
-
+    /**
+     * Retrieves a specific document for the given shelter and document type
+     */
     @GetMapping("/{shelterId}/documents/{documentType}")
     public ResponseEntity<byte[]> getDocument(
             @PathVariable Long shelterId,
             @PathVariable String documentType) {
 
         try {
-            log.info("Cerere de obținere document primită pentru adăpostul: {} și tipul: {}",
+            log.info("Document retrieval request received for shelter: {} and type: {}",
                     shelterId, documentType);
 
             byte[] document = documentService.getDocument(shelterId, documentType);
@@ -63,22 +68,24 @@ public class DocumentController {
 
             MediaType mediaType = determineMediaType(contentType);
 
-            log.info("Document livrat cu succes pentru adăpostul: {} și tipul: {}",
+            log.info("Document successfully delivered for shelter: {} and type: {}",
                     shelterId, documentType);
 
             return ResponseEntity.ok()
                     .contentType(mediaType)
                     .body(document);
         } catch (ResponseStatusException e) {
-            log.warn("Eroare la obținerea documentului: {}", e.getReason());
+            log.warn("Error retrieving the document: {}", e.getReason());
             return ResponseEntity.status(e.getStatusCode()).build();
         } catch (Exception e) {
-            log.error("Eroare neașteptată la obținerea documentului", e);
+            log.error("Unexpected error occurred while retrieving the document", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
-
+    /**
+     * Deletes a document for the given shelter and document type
+     */
     @DeleteMapping("/{shelterId}/documents/{documentType}")
     public ResponseEntity<?> deleteDocument(
             @PathVariable Long shelterId,
@@ -97,30 +104,37 @@ public class DocumentController {
     }
 
 
+    /**
+     * Returns the status of required documents for a given shelter
+     * Each entry in the map shows whether a document type has been uploaded
+     */
     @GetMapping("/{shelterId}/documents/status")
     public ResponseEntity<Map<String, Boolean>> getDocumentStatus(@PathVariable Long shelterId) {
         try {
-            log.info("Cerere de obținere status document primită pentru adăpostul: {}", shelterId);
+            log.info("Document status request received for shelter: {}", shelterId);
 
             Map<String, Boolean> status = documentService.getDocumentStatus(shelterId);
 
-            log.info("Status document obținut cu succes pentru adăpostul: {}", shelterId);
+            log.info("Document status successfully retrieved for shelter: {}", shelterId);
 
             return ResponseEntity.ok(status);
         } catch (Exception e) {
-            log.error("Eroare la obținerea statusului documentelor", e);
+            log.error("Error retrieving document status", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
-
+    /**
+     * Safely parses the content type string to a MediaType
+     * Returns application/octet-stream as fallback
+     */
     private MediaType determineMediaType(String contentType) {
         try {
             if (contentType != null && !contentType.isEmpty()) {
                 return MediaType.parseMediaType(contentType);
             }
         } catch (Exception e) {
-            log.warn("Eroare la parsarea tipului de media: {}", e.getMessage());
+            log.warn("Error parsing media type: {}", e.getMessage());
         }
 
         return MediaType.APPLICATION_OCTET_STREAM;
