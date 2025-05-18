@@ -13,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -57,9 +58,25 @@ public class AuthService {
     }
 
     public boolean isRefreshTokenValid(String token) {
-        return refreshTokenRepository.findByToken(token)
-                .filter(rt -> !rt.isRevoked() && rt.getExpiryDate().isAfter(Instant.now()))
-                .isPresent();
+        try {
+            Optional<RefreshToken> refreshTokenOpt = refreshTokenRepository.findByToken(token);
+            if (refreshTokenOpt.isEmpty()) {
+                System.out.println("Refresh token not found in database: " + token);
+                return false;
+            }
+
+            RefreshToken refreshToken = refreshTokenOpt.get();
+            boolean isNotRevoked = !refreshToken.isRevoked();
+            boolean isNotExpired = refreshToken.getExpiryDate().isAfter(Instant.now());
+
+            System.out.println("Refresh token found. Revoked: " + refreshToken.isRevoked()
+                    + ", Expired: " + !isNotExpired);
+
+            return isNotRevoked && isNotExpired;
+        } catch (Exception e) {
+            System.out.println("Error validating refresh token: " + e.getMessage());
+            return false;
+        }
     }
 
     public String extractUsernameFromToken(String token) {

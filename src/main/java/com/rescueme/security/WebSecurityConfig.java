@@ -3,6 +3,7 @@ package com.rescueme.security;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
@@ -47,19 +48,25 @@ public class WebSecurityConfig {
                         .requestMatchers("/api/v1/auth/reset-password").permitAll()
                         .requestMatchers("/api/v1/auth/change-password").permitAll()
 
-                        .requestMatchers("/users/**").permitAll()
-                        .requestMatchers("/pets/**").permitAll()
-                        .requestMatchers("/pet-photos/**").permitAll()
-                        .requestMatchers("/api/test-notifications/**").permitAll()
-                        .requestMatchers("/api/notifications/**").permitAll()
-                        .requestMatchers("/api/v1/messages/**").permitAll()
-                        .requestMatchers("/api/v1/donations/**").permitAll()
-                        .requestMatchers("/api/v1/attachments/**").permitAll()
-                        .requestMatchers("/api/v1/shelters/**").permitAll()
-                        .requestMatchers("/api/v1/admin/**").permitAll()
-                        .requestMatchers("/api/v1/favorites/**").permitAll()
-                        .requestMatchers("/api/v1/events/**").permitAll()
-                        .requestMatchers("/api/v1/adoptions/**").permitAll()
+                        // Permite GET pe /api/v1/events
+                        .requestMatchers(HttpMethod.GET, "/api/v1/events").permitAll()
+                        .requestMatchers("/api/v1/events/**").authenticated()
+
+                        // Permite GET pe /pets/available
+                        .requestMatchers(HttpMethod.GET, "/pets/available").permitAll()
+                        .requestMatchers("/pets/**").authenticated()
+
+                        .requestMatchers("/users/**").authenticated()
+                        .requestMatchers("/pet-photos/**").authenticated()
+                        .requestMatchers("/api/test-notifications/**").authenticated()
+                        .requestMatchers("/api/notifications/**").authenticated()
+                        .requestMatchers("/api/v1/messages/**").authenticated()
+                        .requestMatchers("/api/v1/donations/**").authenticated()
+                        .requestMatchers("/api/v1/attachments/**").authenticated()
+                        .requestMatchers("/api/v1/shelters/**").authenticated()
+                        .requestMatchers("/api/v1/admin/**").authenticated()
+                        .requestMatchers("/api/v1/favorites/**").authenticated()
+                        .requestMatchers("/api/v1/adoptions/**").authenticated()
 
                         .anyRequest().authenticated()
                 )

@@ -68,13 +68,13 @@ public class AuthController {
 
         Cookie accessCookie = new Cookie("accessToken", loginResponse.getToken());
         accessCookie.setHttpOnly(true);
-        accessCookie.setSecure(true);
+        accessCookie.setSecure(false);
         accessCookie.setPath("/");
         accessCookie.setMaxAge(60 * 15);
 
         Cookie refreshCookie = new Cookie("refreshToken", loginResponse.getRefreshToken());
         refreshCookie.setHttpOnly(true);
-        refreshCookie.setSecure(true);
+        refreshCookie.setSecure(false);
         refreshCookie.setPath("/");
         refreshCookie.setMaxAge(60 * 60 * 24 * 7);
 
@@ -95,13 +95,13 @@ public class AuthController {
 
         Cookie accessTokenCookie = new Cookie("accessToken", null);
         accessTokenCookie.setHttpOnly(true);
-        accessTokenCookie.setSecure(true);
+        accessTokenCookie.setSecure(false);
         accessTokenCookie.setPath("/");
         accessTokenCookie.setMaxAge(0);
 
         Cookie refreshTokenCookie = new Cookie("refreshToken", null);
         refreshTokenCookie.setHttpOnly(true);
-        refreshTokenCookie.setSecure(true);
+        refreshTokenCookie.setSecure(false);
         refreshTokenCookie.setPath("/");
         refreshTokenCookie.setMaxAge(0);
 
@@ -118,31 +118,68 @@ public class AuthController {
     }
 
     /**
-     * Refreshes the access token using a valid refresh token from the cookie
+     * Refreshes the access token using a valid refresh token from any source
      */
     @PostMapping("/refresh-token")
-    public ResponseEntity<?> refreshToken(@CookieValue(value = "refreshToken", required = false) String refreshToken,
-                                          HttpServletResponse response) {
+    public ResponseEntity<?> refreshToken(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            @RequestBody(required = false) Map<String, String> body) {
+
+        String refreshToken = null;
+
+        if (body != null && body.containsKey("refreshToken")) {
+            refreshToken = body.get("refreshToken");
+        }
+
+        if (refreshToken == null && request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if ("refreshToken".equals(cookie.getName())) {
+                    refreshToken = cookie.getValue();
+                    break;
+                }
+            }
+        }
+
+        if (refreshToken == null) {
+            String authHeader = request.getHeader("Authorization");
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                refreshToken = authHeader.substring(7);
+            }
+        }
+
         if (refreshToken == null || !authService.isRefreshTokenValid(refreshToken)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Invalid or expired refresh token"));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", "Invalid or expired refresh token"));
         }
 
         String email = authService.extractUsernameFromToken(refreshToken);
         User user = userRepository.findByEmail(email).orElse(null);
+
         if (user == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "User not found"));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", "User not found"));
         }
 
         String newAccessToken = authService.generateAccessToken(user);
 
         Cookie accessCookie = new Cookie("accessToken", newAccessToken);
         accessCookie.setHttpOnly(true);
-        accessCookie.setSecure(true);
+        accessCookie.setSecure(false);
         accessCookie.setPath("/");
         accessCookie.setMaxAge(60 * 15);
         response.addCookie(accessCookie);
 
-        return ResponseEntity.ok(Map.of("message", "Access token refreshed"));
+        Map<String, Object> responseBody = new HashMap<>();
+        responseBody.put("message", "Access token refreshed");
+        responseBody.put("token", newAccessToken);
+
+        return ResponseEntity.ok(responseBody);
+    }
+
+    @GetMapping("/test-refresh")
+    public ResponseEntity<?> testRefresh() {
+        return ResponseEntity.ok(Map.of("message", "This is a protected resource, if you see this, authentication works"));
     }
 
     /**
