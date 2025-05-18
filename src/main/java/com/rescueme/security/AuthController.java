@@ -1,6 +1,7 @@
 package com.rescueme.security;
 
 import com.rescueme.repository.UserRepository;
+import com.rescueme.repository.entity.Role;
 import com.rescueme.repository.entity.User;
 import com.rescueme.security.request.AdopterRegisterRequest;
 import com.rescueme.security.request.LoginRequest;
@@ -66,22 +67,44 @@ public class AuthController {
         LoginResponse loginResponse = authService.login(request);
         User user = userRepository.findByEmail(request.getEmail()).orElseThrow();
 
-        Cookie accessCookie = new Cookie("accessToken", loginResponse.getToken());
-        accessCookie.setHttpOnly(true);
-        accessCookie.setSecure(false);
-        accessCookie.setPath("/");
-        accessCookie.setMaxAge(60 * 15);
+        if (user.getRole() == Role.ADMIN) {
+            Cookie accessCookie = new Cookie("accessToken", loginResponse.getToken());
+            accessCookie.setHttpOnly(true);
+            accessCookie.setSecure(false);
+            accessCookie.setPath("/");
+            accessCookie.setMaxAge(60 * 60 * 24);
 
-        Cookie refreshCookie = new Cookie("refreshToken", loginResponse.getRefreshToken());
-        refreshCookie.setHttpOnly(true);
-        refreshCookie.setSecure(false);
-        refreshCookie.setPath("/");
-        refreshCookie.setMaxAge(60 * 60 * 24 * 7);
+            Cookie refreshCookie = new Cookie("refreshToken", loginResponse.getRefreshToken());
+            refreshCookie.setHttpOnly(true);
+            refreshCookie.setSecure(false);
+            refreshCookie.setPath("/");
+            refreshCookie.setMaxAge(60 * 60 * 24 * 7);
 
-        response.addCookie(accessCookie);
-        response.addCookie(refreshCookie);
+            response.addCookie(accessCookie);
+            response.addCookie(refreshCookie);
 
-        authService.saveRefreshToken(loginResponse.getRefreshToken(), user, 1000L * 60 * 60 * 24 * 7);
+            // Modifică loginResponse pentru frontend ca să știe că este admin
+            loginResponse.setRole("ADMIN");
+//            loginResponse.setToken("admin-token"); // Pentru compatibilitate cu codul frontend existent
+            loginResponse.setId(user.getId());
+        } else {
+            Cookie accessCookie = new Cookie("accessToken", loginResponse.getToken());
+            accessCookie.setHttpOnly(true);
+            accessCookie.setSecure(false);
+            accessCookie.setPath("/");
+            accessCookie.setMaxAge(60 * 60 * 24);
+
+            Cookie refreshCookie = new Cookie("refreshToken", loginResponse.getRefreshToken());
+            refreshCookie.setHttpOnly(true);
+            refreshCookie.setSecure(false);
+            refreshCookie.setPath("/");
+            refreshCookie.setMaxAge(60 * 60 * 24 * 7);
+
+            response.addCookie(accessCookie);
+            response.addCookie(refreshCookie);
+        }
+
+//        authService.saveRefreshToken(loginResponse.getRefreshToken(), user, 1000L * 60 * 60 * 24 * 7);
 
         return ResponseEntity.ok(loginResponse);
     }

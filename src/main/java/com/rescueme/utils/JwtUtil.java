@@ -18,7 +18,7 @@ public class JwtUtil {
     @Value("mySuperSecretKey1234567890123456789012345679")
     private String secretKey;
 
-    private final long ACCESS_TOKEN_EXPIRATION = 1000 * 60 * 2; // 2 min
+    private final long ACCESS_TOKEN_EXPIRATION = 1000 * 60 * 60 * 24; // 1 zi
     private final long REFRESH_TOKEN_EXPIRATION = 1000L * 60 * 60 * 24 * 7; // 7 zile
 
     public String generateToken(User user) {
@@ -41,12 +41,8 @@ public class JwtUtil {
 
     public Boolean validateToken(String token, User userDetails) {
         final String email = extractUsername(token);
-        System.out.println("Validating token: email from token = " + email);
-        System.out.println("User email from database = " + userDetails.getEmail());
-        System.out.println("User username from database = " + userDetails.getUsername());
 
         boolean valid = (email.equals(userDetails.getEmail()) && !isTokenExpired(token));
-        System.out.println("Token validation result: " + valid);
 
         return valid;
     }

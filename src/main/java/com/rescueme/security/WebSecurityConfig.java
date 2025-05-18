@@ -47,6 +47,7 @@ public class WebSecurityConfig {
                         .requestMatchers("/api/v1/auth/request-reset").permitAll()
                         .requestMatchers("/api/v1/auth/reset-password").permitAll()
                         .requestMatchers("/api/v1/auth/change-password").permitAll()
+                        .requestMatchers("/api/v1/admin/**").permitAll()
 
                         // Permite GET pe /api/v1/events
                         .requestMatchers(HttpMethod.GET, "/api/v1/events").permitAll()
@@ -63,8 +64,8 @@ public class WebSecurityConfig {
                         .requestMatchers("/api/v1/messages/**").authenticated()
                         .requestMatchers("/api/v1/donations/**").authenticated()
                         .requestMatchers("/api/v1/attachments/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/shelters/{shelterId}/documents/{documentType}").permitAll()
                         .requestMatchers("/api/v1/shelters/**").authenticated()
-                        .requestMatchers("/api/v1/admin/**").authenticated()
                         .requestMatchers("/api/v1/favorites/**").authenticated()
                         .requestMatchers("/api/v1/adoptions/**").authenticated()
 

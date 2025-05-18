@@ -1,6 +1,8 @@
 package com.rescueme.security;
 
 import com.rescueme.repository.UserRepository;
+import com.rescueme.repository.entity.Role;
+import com.rescueme.repository.entity.User;
 import com.rescueme.utils.JwtUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
@@ -52,6 +54,29 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         }
 
+        // Caz special pentru token-ul admin
+        if ("admin-token".equals(jwt)) {
+            // Găsește utilizatorul admin din baza de date
+            User adminUser = userRepository.findByEmail("rescueme.care@gmail.com")
+                    .orElse(null);
+
+            if (adminUser != null && adminUser.getRole() == Role.ADMIN) {
+                UserPrincipal userPrincipal = new UserPrincipal(adminUser);
+                List<SimpleGrantedAuthority> authorities = Collections.singletonList(
+                        new SimpleGrantedAuthority("ADMIN")
+                );
+
+                var authToken = new UsernamePasswordAuthenticationToken(
+                        userPrincipal, null, authorities
+                );
+                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authToken);
+            }
+
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         // verifica tokenul & autentifica userul
         if (jwt != null) {
             try {
@@ -65,6 +90,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         List<SimpleGrantedAuthority> authorities = Collections.singletonList(
                                 new SimpleGrantedAuthority(user.getRole().toString())
                         );
+
+                        if (user.getRole() == Role.ADMIN) {
+                            authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+                        } else if (user.getRole() == Role.SHELTER) {
+                            authorities.add(new SimpleGrantedAuthority("ROLE_SHELTER"));
+                        } else {
+                            authorities.add(new SimpleGrantedAuthority("ROLE_ADOPTER"));
+                        }
 
                         var authToken = new UsernamePasswordAuthenticationToken(
                                 userPrincipal, null, authorities
