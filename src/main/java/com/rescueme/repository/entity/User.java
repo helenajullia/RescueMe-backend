@@ -78,6 +78,15 @@ public class User {
     @Column(name = "first_login_after_approval")
     private Boolean firstLoginAfterApproval = false;
 
+    @Column(name = "rejection_reason")
+    private String rejectionReason;
+
+    @Column(name = "rejection_details", length = 500)
+    private String rejectionDetails;
+
+    @Column(name = "rejected_at")
+    private LocalDateTime rejectedAt;
+
     @OneToMany(mappedBy = "shelter", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonIgnore
     private List<Pet> pets = new ArrayList<>();

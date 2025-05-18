@@ -1,7 +1,9 @@
 package com.rescueme.security;
 
+import com.rescueme.repository.RefreshTokenRepository;
 import com.rescueme.repository.UserRepository;
 import com.rescueme.repository.entity.Role;
+import com.rescueme.repository.entity.ShelterStatus;
 import com.rescueme.repository.entity.User;
 import com.rescueme.security.request.AdopterRegisterRequest;
 import com.rescueme.security.request.LoginRequest;
@@ -18,6 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,6 +35,7 @@ public class AuthController {
     private final EmailService emailService;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final Map<String, String> resetTokens = new HashMap<>();
 
     /**
@@ -65,20 +69,39 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request, HttpServletResponse response) {
         LoginResponse loginResponse = authService.login(request);
-            Cookie accessCookie = new Cookie("accessToken", loginResponse.getToken());
-            accessCookie.setHttpOnly(true);
-            accessCookie.setSecure(false);
-            accessCookie.setPath("/");
-            accessCookie.setMaxAge(60 * 60 * 24);
+        User user = userRepository.findByEmail(request.getEmail()).orElseThrow();
 
-            Cookie refreshCookie = new Cookie("refreshToken", loginResponse.getRefreshToken());
-            refreshCookie.setHttpOnly(true);
-            refreshCookie.setSecure(false);
-            refreshCookie.setPath("/");
-            refreshCookie.setMaxAge(60 * 60 * 24 * 7);
+        // Create cookies for tokens
+        Cookie accessCookie = new Cookie("accessToken", loginResponse.getToken());
+        accessCookie.setHttpOnly(true);
+        accessCookie.setSecure(true);
+        accessCookie.setPath("/");
+        accessCookie.setMaxAge(60 * 15);
 
-            response.addCookie(accessCookie);
-            response.addCookie(refreshCookie);
+        Cookie refreshCookie = new Cookie("refreshToken", loginResponse.getRefreshToken());
+        refreshCookie.setHttpOnly(true);
+        refreshCookie.setSecure(true);
+        refreshCookie.setPath("/");
+        refreshCookie.setMaxAge(60 * 60 * 24 * 7);
+
+        response.addCookie(accessCookie);
+        response.addCookie(refreshCookie);
+
+
+        // Add shelter details if applicable
+        if (user.getRole() == Role.SHELTER) {
+            loginResponse.setStatus(user.getStatus().toString());
+
+            // Add rejection details if the shelter was rejected
+            if (user.getStatus() == ShelterStatus.REJECTED) {
+                loginResponse.setRejectionReason(user.getRejectionReason());
+                loginResponse.setRejectionDetails(user.getRejectionDetails());
+                loginResponse.setRejectedAt(user.getRejectedAt() != null ?
+                        user.getRejectedAt().toString() : null);
+            }
+
+            loginResponse.setFirstLoginAfterApproval(user.getFirstLoginAfterApproval());
+        }
 
         return ResponseEntity.ok(loginResponse);
     }
@@ -254,4 +277,36 @@ public class AuthController {
         return ResponseEntity.ok(Map.of("message", "Password reset successfully"));
     }
 
+
+    @DeleteMapping("/delete-rejected-shelter")
+    public ResponseEntity<Map<String, String>> deleteRejectedShelter(@RequestBody Map<String, Object> request) {
+        try {
+            String shelterIdStr = String.valueOf(request.get("shelterId"));
+            Long shelterId = Long.parseLong(shelterIdStr);
+
+            User shelter = userRepository.findById(shelterId)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Shelter not found"));
+
+            // Verifică dacă utilizatorul este un shelter
+            if (shelter.getRole() == Role.SHELTER) {
+                // Șterge mai întâi tokenurile de refresh asociate
+                refreshTokenRepository.deleteByUserId(shelterId);
+
+                // Apoi șterge utilizatorul
+                userRepository.delete(shelter);
+
+                return ResponseEntity.ok(Map.of("message", "Shelter deleted successfully"));
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(Map.of("message", "Only shelters can be deleted through this endpoint"));
+            }
+        } catch (NumberFormatException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("message", "Invalid shelter ID format"));
+        } catch (Exception e) {
+            e.printStackTrace(); // Pentru debugging
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "Failed to delete shelter: " + e.getMessage()));
+        }
+    }
 }

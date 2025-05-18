@@ -99,13 +99,32 @@ public class AdminDashboardController {
      * Updates the shelter's status to REJECTED
      */
     @PostMapping("/shelters/{shelterId}/reject")
-    public ResponseEntity<Map<String, String>> rejectShelter(@PathVariable Long shelterId) {
+    public ResponseEntity<Map<String, String>> rejectShelter(
+            @PathVariable Long shelterId,
+            @RequestBody Map<String, Object> rejectionData) {
+
         User shelter = userService.getShelterById(shelterId);
 
-        shelter.setStatus(ShelterStatus.REJECTED);
-        userService.updateUser(shelterId, Map.of("status", ShelterStatus.REJECTED));
+        // Extract rejection reason and details
+        String reason = (String) rejectionData.getOrDefault("reason", "UNSPECIFIED");
+        String customReason = (String) rejectionData.get("customReason");
+        String details = (String) rejectionData.get("details");
+
+        // Build the full rejection reason to be stored
+        String fullRejectionReason = reason;
+        if ("OTHER".equals(reason) && customReason != null && !customReason.isEmpty()) {
+            fullRejectionReason = customReason;
+        }
+
+        // Update shelter status and rejection details
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("status", ShelterStatus.REJECTED);
+        updates.put("rejectionReason", fullRejectionReason);
+        updates.put("rejectionDetails", details);
+        updates.put("rejectedAt", LocalDateTime.now());
+
+        userService.updateUser(shelterId, updates);
 
         return ResponseEntity.ok(Map.of("message", "Shelter rejected successfully"));
     }
-
 }

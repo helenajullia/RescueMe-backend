@@ -152,18 +152,6 @@ public class UserServiceImpl implements UserService {
                 case "hoursOfOperation":
                     user.setHoursOfOperation((String) value);
                     break;
-                case "approvedAt":
-                    if (value instanceof LocalDateTime) {
-                        user.setApprovedAt((LocalDateTime) value);
-                    }
-                    break;
-                case "firstLoginAfterApproval":
-                    if (value instanceof Boolean) {
-                        user.setFirstLoginAfterApproval((Boolean) value);
-                    } else if (value instanceof String) {
-                        user.setFirstLoginAfterApproval(Boolean.valueOf((String) value));
-                    }
-                    break;
                 case "status":
                     if (value instanceof ShelterStatus) {
                         user.setStatus((ShelterStatus) value);
@@ -182,6 +170,30 @@ public class UserServiceImpl implements UserService {
                         }
                     }
                     break;
+                case "approvedAt":
+                    if (value instanceof LocalDateTime) {
+                        user.setApprovedAt((LocalDateTime) value);
+                    }
+                    break;
+                case "firstLoginAfterApproval":
+                    if (value instanceof Boolean) {
+                        user.setFirstLoginAfterApproval((Boolean) value);
+                    } else if (value instanceof String) {
+                        user.setFirstLoginAfterApproval(Boolean.valueOf((String) value));
+                    }
+                    break;
+                // Add the new fields here
+                case "rejectionReason":
+                    user.setRejectionReason((String) value);
+                    break;
+                case "rejectionDetails":
+                    user.setRejectionDetails((String) value);
+                    break;
+                case "rejectedAt":
+                    if (value instanceof LocalDateTime) {
+                        user.setRejectedAt((LocalDateTime) value);
+                    }
+                    break;
                 default:
                     throw new IllegalArgumentException("Unknown field: " + key);
             }
@@ -189,7 +201,6 @@ public class UserServiceImpl implements UserService {
 
         return userRepository.save(user);
     }
-
 
     @Override
     public void uploadProfilePicture(Long userId, MultipartFile file) {
