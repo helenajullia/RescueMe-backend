@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -36,81 +37,80 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
         String jwt = null;
 
-        // extrage token din cookie sau header
-
-        if (request.getCookies() != null) {
-            for (Cookie cookie : request.getCookies()) {
-                if ("accessToken".equals(cookie.getName())) {
-                    jwt = cookie.getValue();
-                    break;
-                }
-            }
-        }
-
-        if (jwt == null) {
-            String authHeader = request.getHeader("Authorization");
-            if (authHeader != null && authHeader.startsWith("Bearer ")) {
-                jwt = authHeader.substring(7);
-            }
-        }
-
-        // Caz special pentru token-ul admin
-        if ("admin-token".equals(jwt)) {
-            // Găsește utilizatorul admin din baza de date
-            User adminUser = userRepository.findByEmail("rescueme.care@gmail.com")
-                    .orElse(null);
-
-            if (adminUser != null && adminUser.getRole() == Role.ADMIN) {
-                UserPrincipal userPrincipal = new UserPrincipal(adminUser);
-                List<SimpleGrantedAuthority> authorities = Collections.singletonList(
-                        new SimpleGrantedAuthority("ADMIN")
-                );
-
-                var authToken = new UsernamePasswordAuthenticationToken(
-                        userPrincipal, null, authorities
-                );
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authToken);
-            }
-
-            filterChain.doFilter(request, response);
-            return;
-        }
-
-        // verifica tokenul & autentifica userul
-        if (jwt != null) {
-            try {
-                String username = jwtUtil.extractUsername(jwt);
-
-                if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                    var user = userRepository.findByEmail(username).orElse(null);
-                    if (user != null && jwtUtil.validateToken(jwt, user)) {
-                        UserPrincipal userPrincipal = new UserPrincipal(user);
-
-                        List<SimpleGrantedAuthority> authorities = Collections.singletonList(
-                                new SimpleGrantedAuthority(user.getRole().toString())
-                        );
-
-                        if (user.getRole() == Role.ADMIN) {
-                            authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
-                        } else if (user.getRole() == Role.SHELTER) {
-                            authorities.add(new SimpleGrantedAuthority("ROLE_SHELTER"));
-                        } else {
-                            authorities.add(new SimpleGrantedAuthority("ROLE_ADOPTER"));
-                        }
-
-                        var authToken = new UsernamePasswordAuthenticationToken(
-                                userPrincipal, null, authorities
-                        );
-                        authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                        SecurityContextHolder.getContext().setAuthentication(authToken);
+        try {
+            // Extract token from cookie or header
+            if (request.getCookies() != null) {
+                for (Cookie cookie : request.getCookies()) {
+                    if ("accessToken".equals(cookie.getName())) {
+                        jwt = cookie.getValue();
+                        System.out.println("Found JWT in cookie: " + jwt.substring(0, Math.min(10, jwt.length())) + "...");
+                        break;
                     }
                 }
-            } catch (ExpiredJwtException e) {
-                System.out.println("JWT expired: " + e.getMessage());
-            } catch (Exception e) {
-                System.out.println("Error processing JWT: " + e.getMessage());
             }
+
+            if (jwt == null) {
+                String authHeader = request.getHeader("Authorization");
+                if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                    jwt = authHeader.substring(7);
+                    System.out.println("Found JWT in Authorization header: " + jwt.substring(0, Math.min(10, jwt.length())) + "...");
+                }
+            }
+
+            // Validate token and authenticate user
+            if (jwt != null) {
+                try {
+                    String username = jwtUtil.extractUsername(jwt);
+                    System.out.println("Extracted username from JWT: " + username);
+
+                    if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                        var user = userRepository.findByEmail(username).orElse(null);
+
+                        if (user == null) {
+                            System.out.println("User not found for email: " + username);
+                        } else {
+                            boolean isTokenValid = jwtUtil.validateToken(jwt, user);
+                            System.out.println("JWT validation result for user " + user.getUsername() + ": " + isTokenValid);
+
+                            if (isTokenValid) {
+                                UserPrincipal userPrincipal = new UserPrincipal(user);
+
+                                List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+                                authorities.add(new SimpleGrantedAuthority(user.getRole().toString()));
+
+                                // Add role-specific authorities
+                                if (user.getRole() == Role.ADMIN) {
+                                    authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+                                    System.out.println("Added ADMIN role to authorities");
+                                } else if (user.getRole() == Role.SHELTER) {
+                                    authorities.add(new SimpleGrantedAuthority("ROLE_SHELTER"));
+                                    System.out.println("Added SHELTER role to authorities");
+                                } else {
+                                    authorities.add(new SimpleGrantedAuthority("ROLE_ADOPTER"));
+                                    System.out.println("Added ADOPTER role to authorities");
+                                }
+
+                                var authToken = new UsernamePasswordAuthenticationToken(
+                                        userPrincipal, null, authorities
+                                );
+                                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                                SecurityContextHolder.getContext().setAuthentication(authToken);
+                                System.out.println("Successfully authenticated user: " + user.getUsername());
+                            }
+                        }
+                    }
+                } catch (ExpiredJwtException e) {
+                    System.out.println("JWT expired: " + e.getMessage());
+                } catch (Exception e) {
+                    System.out.println("Error processing JWT: " + e.getMessage());
+                    e.printStackTrace(); // Print stack trace for more detailed error info
+                }
+            } else {
+                System.out.println("No JWT token found for request: " + request.getRequestURI());
+            }
+        } catch (Exception e) {
+            System.out.println("General exception in JwtAuthenticationFilter: " + e.getMessage());
+            e.printStackTrace();
         }
 
         filterChain.doFilter(request, response);

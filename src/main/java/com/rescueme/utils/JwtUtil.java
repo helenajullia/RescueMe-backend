@@ -30,34 +30,72 @@ public class JwtUtil {
     }
 
     private String createToken(Map<String, Object> claims, String subject, long expiration) {
-        return Jwts.builder()
-                .setClaims(claims)
-                .setSubject(subject)
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + expiration))
-                .signWith(SignatureAlgorithm.HS256, secretKey)
-                .compact();
+        try {
+            return Jwts.builder()
+                    .setClaims(claims)
+                    .setSubject(subject)
+                    .setIssuedAt(new Date())
+                    .setExpiration(new Date(System.currentTimeMillis() + expiration))
+                    .signWith(SignatureAlgorithm.HS256, secretKey)
+                    .compact();
+        } catch (Exception e) {
+            System.out.println("Error creating JWT token: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     public Boolean validateToken(String token, User userDetails) {
-        final String email = extractUsername(token);
-
-        boolean valid = (email.equals(userDetails.getEmail()) && !isTokenExpired(token));
-
-        return valid;
+        try {
+            final String email = extractUsername(token);
+            boolean valid = (email.equals(userDetails.getEmail()) && !isTokenExpired(token));
+            return valid;
+        } catch (Exception e) {
+            System.out.println("Error validating token: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
     }
 
     public String extractUsername(String token) {
-        return extractClaim(token, Claims::getSubject);
+        try {
+            return extractClaim(token, Claims::getSubject);
+        } catch (Exception e) {
+            System.out.println("Error extracting username from token: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
-        final Claims claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
-        return claimsResolver.apply(claims);
+        try {
+            final Claims claims = extractAllClaims(token);
+            return claimsResolver.apply(claims);
+        } catch (Exception e) {
+            System.out.println("Error extracting claim from token: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    private Claims extractAllClaims(String token) {
+        try {
+            return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
+        } catch (Exception e) {
+            System.out.println("Error parsing JWT claims: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     private Boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
+        try {
+            return extractExpiration(token).before(new Date());
+        } catch (Exception e) {
+            System.out.println("Error checking if token is expired: " + e.getMessage());
+            e.printStackTrace();
+            return true;
+        }
     }
 
     private Date extractExpiration(String token) {

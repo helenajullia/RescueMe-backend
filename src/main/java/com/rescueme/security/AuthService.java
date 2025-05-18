@@ -35,13 +35,9 @@ public class AuthService {
             throw new IncorrectCredentialsException("Incorrect credentials");
         }
 
-        // Verificare specială pentru admin - adaugă un ID special pentru frontend
-        String idToSend = user.getRole() == Role.ADMIN ? "admin-id" : user.getId().toString();
-
         String accessToken = jwtUtil.generateToken(user); // 1 zi
         String refreshToken = jwtUtil.generateRefreshToken(user); // 7 zile
 
-        // Salvăm token-ul de refresh
         saveRefreshToken(refreshToken, user, 1000L * 60 * 60 * 24 * 7);
 
         return new LoginResponse(
@@ -49,7 +45,7 @@ public class AuthService {
                 refreshToken,
                 user.getRole().toString(),
                 user.getUsername(),
-                user.getRole() == Role.ADMIN ? -1L : user.getId() // ID special pentru admin
+                user.getId()
         );
     }
 
