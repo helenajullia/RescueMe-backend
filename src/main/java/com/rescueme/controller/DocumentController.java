@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -25,6 +26,7 @@ public class DocumentController {
      * Uploads a document for the specified shelter and document type
      */
     @PostMapping("/{shelterId}/documents/{documentType}")
+    @PreAuthorize("hasRole('ROLE_SHELTER')")
     public ResponseEntity<?> uploadDocument(
             @PathVariable Long shelterId,
             @PathVariable String documentType,
@@ -87,6 +89,7 @@ public class DocumentController {
      * Deletes a document for the given shelter and document type
      */
     @DeleteMapping("/{shelterId}/documents/{documentType}")
+    @PreAuthorize("hasRole('ROLE_SHELTER')")
     public ResponseEntity<?> deleteDocument(
             @PathVariable Long shelterId,
             @PathVariable String documentType) {

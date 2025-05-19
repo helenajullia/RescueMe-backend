@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -32,6 +33,7 @@ public class EventController {
      * Creates a new event associated with a shelter
      */
     @PostMapping
+    @PreAuthorize("hasRole('ROLE_SHELTER')")
     public ResponseEntity<EventResponseDTO> createEvent(
             @RequestBody Event eventData,
             @RequestHeader("shelterId") Long shelterId) {
@@ -158,6 +160,7 @@ public class EventController {
      * Deletes a specific event by ID
      */
     @DeleteMapping("/{eventId}")
+    @PreAuthorize("hasRole('ROLE_SHELTER')")
     public ResponseEntity<Map<String, String>> deleteEvent(
             @PathVariable Long eventId,
             @RequestHeader("shelterId") Long shelterId) {

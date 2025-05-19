@@ -3,6 +3,7 @@ package com.rescueme.controller;
 import com.rescueme.service.FavoriteService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -37,6 +38,7 @@ public class FavoriteController {
      * Adds a pet to the user's list of favorites
      */
     @PostMapping("/{userId}/{petId}")
+    @PreAuthorize("hasRole('ROLE_ADOPTER')")
     public ResponseEntity<Map<String, String>> addFavorite(
             @PathVariable Long userId,
             @PathVariable Long petId) {
@@ -48,6 +50,7 @@ public class FavoriteController {
      * Removes a pet from the user's list of favorites
      */
     @DeleteMapping("/{userId}/{petId}")
+    @PreAuthorize("hasRole('ROLE_ADOPTER')")
     public ResponseEntity<Map<String, String>> removeFavorite(
             @PathVariable Long userId,
             @PathVariable Long petId) {

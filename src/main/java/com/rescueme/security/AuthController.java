@@ -71,7 +71,6 @@ public class AuthController {
         LoginResponse loginResponse = authService.login(request);
         User user = userRepository.findByEmail(request.getEmail()).orElseThrow();
 
-        // Create cookies for tokens
         Cookie accessCookie = new Cookie("accessToken", loginResponse.getToken());
         accessCookie.setHttpOnly(true);
         accessCookie.setSecure(true);
@@ -88,11 +87,9 @@ public class AuthController {
         response.addCookie(refreshCookie);
 
 
-        // Add shelter details if applicable
         if (user.getRole() == Role.SHELTER) {
             loginResponse.setStatus(user.getStatus().toString());
 
-            // Add rejection details if the shelter was rejected
             if (user.getStatus() == ShelterStatus.REJECTED) {
                 loginResponse.setRejectionReason(user.getRejectionReason());
                 loginResponse.setRejectionDetails(user.getRejectionDetails());
@@ -277,7 +274,9 @@ public class AuthController {
         return ResponseEntity.ok(Map.of("message", "Password reset successfully"));
     }
 
-
+    /**
+     * Deletes a rejected shelter.
+     */
     @DeleteMapping("/delete-rejected-shelter")
     public ResponseEntity<Map<String, String>> deleteRejectedShelter(@RequestBody Map<String, Object> request) {
         try {
@@ -287,12 +286,9 @@ public class AuthController {
             User shelter = userRepository.findById(shelterId)
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Shelter not found"));
 
-            // Verifică dacă utilizatorul este un shelter
             if (shelter.getRole() == Role.SHELTER) {
-                // Șterge mai întâi tokenurile de refresh asociate
                 refreshTokenRepository.deleteByUserId(shelterId);
 
-                // Apoi șterge utilizatorul
                 userRepository.delete(shelter);
 
                 return ResponseEntity.ok(Map.of("message", "Shelter deleted successfully"));
@@ -304,7 +300,7 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(Map.of("message", "Invalid shelter ID format"));
         } catch (Exception e) {
-            e.printStackTrace(); // Pentru debugging
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("message", "Failed to delete shelter: " + e.getMessage()));
         }

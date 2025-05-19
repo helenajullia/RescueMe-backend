@@ -2,6 +2,7 @@ package com.rescueme.controller;
 
 import com.rescueme.repository.dto.UserDTO;
 import com.rescueme.repository.entity.Pet;
+import com.rescueme.repository.entity.ShelterStatus;
 import com.rescueme.repository.entity.User;
 import com.rescueme.service.PetService;
 import com.rescueme.service.UserService;
@@ -146,5 +147,23 @@ public class UserController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
+    }
+
+    /**
+     * Returns a list of shelters filtered by status
+     */
+    @GetMapping("/shelters/status/{status}")
+    public ResponseEntity<List<UserDTO>> getSheltersByStatus(@PathVariable ShelterStatus status) {
+        List<UserDTO> shelters = userService.getSheltersByStatus(status);
+        return ResponseEntity.ok(shelters);
+    }
+
+    /**
+     * Returns a list of approved shelters only
+     */
+    @GetMapping("/shelters/approved")
+    public ResponseEntity<List<UserDTO>> getApprovedShelters() {
+        List<UserDTO> approvedShelters = userService.getApprovedShelters();
+        return ResponseEntity.ok(approvedShelters);
     }
 }

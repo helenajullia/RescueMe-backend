@@ -1,6 +1,7 @@
 package com.rescueme.service;
 
 import com.rescueme.repository.dto.UserDTO;
+import com.rescueme.repository.entity.ShelterStatus;
 import com.rescueme.repository.entity.User;
 import com.rescueme.security.request.AdopterRegisterRequest;
 import com.rescueme.security.request.ShelterRegisterRequest;
@@ -40,4 +41,8 @@ public interface UserService {
     User getShelterById(Long shelterId);
 
     List<UserDTO> getAllShelters();
+
+    List<UserDTO> getSheltersByStatus(ShelterStatus status);
+
+    List<UserDTO> getApprovedShelters();
 }

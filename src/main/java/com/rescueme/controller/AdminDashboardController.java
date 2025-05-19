@@ -8,6 +8,7 @@ import com.rescueme.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -79,6 +80,7 @@ public class AdminDashboardController {
      * and flags firstLoginAfterApproval
      */
     @PostMapping("/shelters/{shelterId}/approve")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Map<String, Object>> approveShelter(@PathVariable Long shelterId) {
         Map<String, Object> updates = new HashMap<>();
         updates.put("status", ShelterStatus.APPROVED);
@@ -99,6 +101,7 @@ public class AdminDashboardController {
      * Updates the shelter's status to REJECTED
      */
     @PostMapping("/shelters/{shelterId}/reject")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Map<String, String>> rejectShelter(
             @PathVariable Long shelterId,
             @RequestBody Map<String, Object> rejectionData) {

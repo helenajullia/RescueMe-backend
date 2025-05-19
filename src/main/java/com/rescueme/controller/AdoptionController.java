@@ -9,6 +9,7 @@ import com.rescueme.utils.AdoptionMapperUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -109,6 +110,7 @@ public class AdoptionController {
      * Cancels an existing adoption request
      */
     @DeleteMapping("/requests/{requestId}")
+    @PreAuthorize("hasRole('ROLE_ADOPTER')")
     public ResponseEntity<Void> cancelAdoptionRequest(@PathVariable String requestId) {
         try {
             adoptionService.cancelAdoptionRequest(requestId);
@@ -124,6 +126,7 @@ public class AdoptionController {
      * Marks an adoption request as completed and finalizes the adoption
      */
     @PostMapping("/requests/{requestId}/complete")
+    @PreAuthorize("hasRole('ROLE_SHELTER')")
     public ResponseEntity<AdoptionResponseDTO> completeAdoption(@PathVariable String requestId) {
         try {
             AdoptionRequest completedRequest = adoptionService.completeAdoption(requestId);

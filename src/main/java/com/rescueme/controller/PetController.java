@@ -12,6 +12,7 @@ import com.rescueme.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -44,6 +45,7 @@ public class PetController {
      * Accepts multipart form data with pet info and optional photos
      */
     @PostMapping(value = "/add", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasRole('ROLE_SHELTER')")
     public ResponseEntity<PetResponseDTO> addPet(
             @RequestPart("petData") String petDataString,
             @RequestPart(value = "photos", required = false) List<MultipartFile> photos,
@@ -78,6 +80,7 @@ public class PetController {
      * Only allowed if the pet belongs to the shelter
      */
     @DeleteMapping("/{shelterId}/delete/{petId}")
+    @PreAuthorize("hasRole('ROLE_SHELTER')")
     public ResponseEntity<String> deletePet(@PathVariable Long shelterId, @PathVariable Long petId) {
         if (petService.deletePetByShelterId(shelterId, petId)) {
             return ResponseEntity.ok("Pet deleted successfully");

@@ -265,9 +265,20 @@ public class UserServiceImpl implements UserService {
         return shelter;
     }
 
-
+    @Override
     public List<UserDTO> getAllShelters() {
         List<User> shelters = userRepository.findByRole(Role.SHELTER);
         return shelters.stream().map(UserDTO::new).toList();
+    }
+
+    @Override
+    public List<UserDTO> getSheltersByStatus(ShelterStatus status) {
+        List<User> shelters = userRepository.findByRoleAndStatus(Role.SHELTER, status);
+        return shelters.stream().map(UserDTO::new).toList();
+    }
+
+    @Override
+    public List<UserDTO> getApprovedShelters() {
+        return getSheltersByStatus(ShelterStatus.APPROVED);
     }
 }
