@@ -23,4 +23,14 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
     @Transactional
     @Query("UPDATE Message m SET m.read = true WHERE m.conversationId = ?1 AND m.recipientId = ?2 AND m.read = false")
     void markConversationAsRead(String conversationId, Long recipientId);
+
+    @Modifying
+    @Transactional
+    void deleteById(Long id);
+
+    @Modifying
+    @Transactional
+    @Query(value = "DELETE FROM message_attachments WHERE message_id = ?1", nativeQuery = true)
+    void deleteAttachmentsByMessageId(Long messageId);
+
 }

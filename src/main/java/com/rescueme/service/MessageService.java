@@ -26,4 +26,6 @@ public interface MessageService {
     byte[] getAttachmentContent(Long attachmentId);
 
     byte[] getAttachmentThumbnail(Long attachmentId);
+
+    boolean deleteMessage(Long messageId, Long userId);
 }

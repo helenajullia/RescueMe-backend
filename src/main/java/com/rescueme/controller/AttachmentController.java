@@ -52,6 +52,10 @@ public class AttachmentController {
             headers.setContentType(MediaType.parseMediaType(info.getContentType()));
             headers.setContentDispositionFormData("attachment", info.getFileName());
 
+            headers.setCacheControl("no-cache, no-store, must-revalidate");
+            headers.setPragma("no-cache");
+            headers.setExpires(0);
+
             return ResponseEntity.ok()
                     .headers(headers)
                     .body(fileData);
@@ -71,8 +75,14 @@ public class AttachmentController {
         try {
             byte[] thumbnailData = messageService.getAttachmentThumbnail(attachmentId);
 
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.IMAGE_JPEG);
+            headers.setCacheControl("no-cache, no-store, must-revalidate");
+            headers.setPragma("no-cache");
+            headers.setExpires(0);
+
             return ResponseEntity.ok()
-                    .contentType(MediaType.IMAGE_JPEG)
+                    .headers(headers)
                     .body(thumbnailData);
         } catch (ResponseStatusException e) {
             return ResponseEntity.status(e.getStatusCode()).build();

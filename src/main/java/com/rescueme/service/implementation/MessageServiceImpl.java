@@ -379,4 +379,27 @@ public class MessageServiceImpl implements MessageService {
 
         return dto;
     }
+
+    @Override
+    @Transactional
+    public boolean deleteMessage(Long messageId, Long userId) {
+        Message message = messageRepository.findById(messageId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Message not found"));
+
+        if (!message.getSenderId().equals(userId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "You can only delete your own messages");
+        }
+
+        try {
+            messageRepository.deleteAttachmentsByMessageId(messageId);
+
+            messageRepository.deleteById(messageId);
+            return true;
+        } catch (Exception e) {
+            log.error("Error deleting message: ", e);
+            throw e;
+        }
+    }
 }

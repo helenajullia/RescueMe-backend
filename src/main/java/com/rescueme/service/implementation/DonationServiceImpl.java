@@ -235,4 +235,13 @@ public class DonationServiceImpl implements DonationService {
 
         return stats;
     }
+
+    @Override
+    @Transactional
+    public void deleteDonation(Long donationId) {
+        Donation donation = donationRepository.findById(donationId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Donation not found"));
+
+        donationRepository.delete(donation);
+    }
 }

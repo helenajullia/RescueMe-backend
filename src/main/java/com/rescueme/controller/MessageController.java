@@ -12,6 +12,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.util.List;
@@ -143,5 +144,31 @@ public class MessageController {
 
         String conversationId = messageService.generateConversationId(user1Id, user2Id);
         return ResponseEntity.ok(Map.of("conversationId", conversationId));
+    }
+
+    /**
+     * Delete a message
+     */
+    @DeleteMapping("/{messageId}")
+    public ResponseEntity<Map<String, String>> deleteMessage(
+            @PathVariable Long messageId,
+            @RequestParam Long userId) {
+
+        try {
+            boolean deleted = messageService.deleteMessage(messageId, userId);
+            if (deleted) {
+                return ResponseEntity.ok(Map.of("message", "Message deleted successfully"));
+            } else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body(Map.of("message", "Failed to delete message"));
+            }
+        } catch (ResponseStatusException e) {
+            return ResponseEntity.status(e.getStatusCode())
+                    .body(Map.of("message", e.getReason()));
+        } catch (Exception e) {
+            log.error("Error deleting message", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "Error deleting message: " + e.getMessage()));
+        }
     }
 }

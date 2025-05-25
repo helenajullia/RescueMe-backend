@@ -16,4 +16,5 @@ public interface DonationService {
     List<DonationResponseDTO> getDonationsForUser(Long userId);
 
     Map<String, Object> getDonationStatistics(Long shelterId);
+    void deleteDonation(Long donationId);
 }

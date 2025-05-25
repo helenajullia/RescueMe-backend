@@ -43,17 +43,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 for (Cookie cookie : request.getCookies()) {
                     if ("accessToken".equals(cookie.getName())) {
                         jwt = cookie.getValue();
-                        System.out.println("Found JWT in cookie: " + jwt.substring(0, Math.min(10, jwt.length())) + "...");
+//                        System.out.println("Found JWT in cookie: " + jwt.substring(0, Math.min(10, jwt.length())) + "...");
                         break;
                     }
                 }
+            }
+
+            // Verifică dacă tokenul este furnizat ca parametru în URL (pentru descărcări imagini)
+            if (jwt == null && request.getParameter("token") != null) {
+                jwt = request.getParameter("token");
             }
 
             if (jwt == null) {
                 String authHeader = request.getHeader("Authorization");
                 if (authHeader != null && authHeader.startsWith("Bearer ")) {
                     jwt = authHeader.substring(7);
-                    System.out.println("Found JWT in Authorization header: " + jwt.substring(0, Math.min(10, jwt.length())) + "...");
+//                    System.out.println("Found JWT in Authorization header: " + jwt.substring(0, Math.min(10, jwt.length())) + "...");
                 }
             }
 
@@ -61,16 +66,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if (jwt != null) {
                 try {
                     String username = jwtUtil.extractUsername(jwt);
-                    System.out.println("Extracted username from JWT: " + username);
+//                    System.out.println("Extracted username from JWT: " + username);
 
                     if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                         var user = userRepository.findByEmail(username).orElse(null);
 
                         if (user == null) {
-                            System.out.println("User not found for email: " + username);
+//                            System.out.println("User not found for email: " + username);
                         } else {
                             boolean isTokenValid = jwtUtil.validateToken(jwt, user);
-                            System.out.println("JWT validation result for user " + user.getUsername() + ": " + isTokenValid);
+//                            System.out.println("JWT validation result for user " + user.getUsername() + ": " + isTokenValid);
 
                             if (isTokenValid) {
                                 UserPrincipal userPrincipal = new UserPrincipal(user);
@@ -78,16 +83,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                 List<SimpleGrantedAuthority> authorities = new ArrayList<>();
                                 authorities.add(new SimpleGrantedAuthority(user.getRole().toString()));
 
-                                // Add role-specific authorities
+                                // role-specific authorities
                                 if (user.getRole() == Role.ADMIN) {
                                     authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
-                                    System.out.println("Added ADMIN role to authorities");
+//                                    System.out.println("Added ADMIN role to authorities");
                                 } else if (user.getRole() == Role.SHELTER) {
                                     authorities.add(new SimpleGrantedAuthority("ROLE_SHELTER"));
-                                    System.out.println("Added SHELTER role to authorities");
+//                                    System.out.println("Added SHELTER role to authorities");
                                 } else {
                                     authorities.add(new SimpleGrantedAuthority("ROLE_ADOPTER"));
-                                    System.out.println("Added ADOPTER role to authorities");
+//                                    System.out.println("Added ADOPTER role to authorities");
                                 }
 
                                 var authToken = new UsernamePasswordAuthenticationToken(
@@ -95,22 +100,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                 );
                                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                                 SecurityContextHolder.getContext().setAuthentication(authToken);
-                                System.out.println("Successfully authenticated user: " + user.getUsername());
+//                                System.out.println("Successfully authenticated user: " + user.getUsername());
                             }
                         }
                     }
                 } catch (ExpiredJwtException e) {
-                    System.out.println("JWT expired: " + e.getMessage());
+//                    System.out.println("JWT expired: " + e.getMessage());
                 } catch (Exception e) {
-                    System.out.println("Error processing JWT: " + e.getMessage());
-                    e.printStackTrace(); // Print stack trace for more detailed error info
+//                    System.out.println("Error processing JWT: " + e.getMessage());
+//                    e.printStackTrace(); // Print stack trace for more detailed error info
                 }
             } else {
-                System.out.println("No JWT token found for request: " + request.getRequestURI());
+//                System.out.println("No JWT token found for request: " + request.getRequestURI());
             }
         } catch (Exception e) {
-            System.out.println("General exception in JwtAuthenticationFilter: " + e.getMessage());
-            e.printStackTrace();
+//            System.out.println("General exception in JwtAuthenticationFilter: " + e.getMessage());
+//            e.printStackTrace();
         }
 
         filterChain.doFilter(request, response);

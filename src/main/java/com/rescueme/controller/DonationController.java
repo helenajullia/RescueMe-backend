@@ -65,4 +65,13 @@ public class DonationController {
         Map<String, Object> statistics = donationService.getDonationStatistics(shelterId);
         return ResponseEntity.ok(statistics);
     }
+
+    /**
+     * Deletes a donation by id
+     */
+    @DeleteMapping("/{donationId}")
+    public ResponseEntity<Map<String, String>> deleteDonation(@PathVariable Long donationId) {
+        donationService.deleteDonation(donationId);
+        return ResponseEntity.ok(Map.of("message", "Donation deleted successfully"));
+    }
 }
