@@ -27,13 +27,13 @@ public class DonationResponseDTO {
         dto.setCurrency(donation.getCurrency());
         dto.setDonationDate(donation.getDonationDate());
         dto.setPaymentStatus(donation.getPaymentStatus().name());
-        dto.setAnonymous(donation.isAnonymous());
+//        dto.setAnonymous(donation.isAnonymous());
 
-        if (!donation.isAnonymous() && donorName != null) {
+//        if (!donation.isAnonymous() && donorName != null) {
             dto.setDonorName(donorName);
-        } else {
-            dto.setDonorName(null);
-        }
+//        } else {
+//            dto.setDonorName(null);
+//        }
 
         dto.setMessage(donation.getMessage());
         return dto;

@@ -211,7 +211,6 @@ public class AdoptionServiceImpl implements AdoptionService {
         adoptionRequest.setStatus(AdoptionRequestStatus.PENDING);
         adoptionRequest.setRequestDate(LocalDateTime.now());
 
-
         AdoptionRequest savedRequest = adoptionRequestRepository.save(adoptionRequest);
 
         notificationService.sendNotificationToShelter(pet.getShelter().getId(), pet.getName());

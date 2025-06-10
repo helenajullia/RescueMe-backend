@@ -93,6 +93,8 @@ public class DocumentServiceImpl implements DocumentService {
         }
     }
 
+
+
     @Override
     @Transactional(readOnly = true)
     public byte[] getDocument(Long shelterId, String documentType) {

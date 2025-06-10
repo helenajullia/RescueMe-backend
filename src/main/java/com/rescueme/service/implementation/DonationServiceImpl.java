@@ -70,7 +70,7 @@ public class DonationServiceImpl implements DonationService {
             PaymentIntentCreateParams createParams = PaymentIntentCreateParams.builder()
                     .setCurrency("ron")
                     .setAmount(amountInCents)
-                    .setDescription("Donație către " + shelter.getUsername())
+                    .setDescription("Donation towards: " + shelter.getUsername())
                     .putMetadata("shelter_id", shelter.getId().toString())
                     .putMetadata("donor_id", requestDTO.getUserId() != null ? requestDTO.getUserId().toString() : "anonymous")
                     .putMetadata("is_anonymous", String.valueOf(requestDTO.isAnonymous()))
@@ -83,7 +83,7 @@ public class DonationServiceImpl implements DonationService {
             donation.setDonorId(requestDTO.isAnonymous() ? null : requestDTO.getUserId());
             donation.setAmount(requestDTO.getAmount());
             donation.setMessage(requestDTO.getMessage());
-            donation.setAnonymous(requestDTO.isAnonymous());
+//            donation.setAnonymous(requestDTO.isAnonymous());
             donation.setTransactionId(intent.getId());
             donation.setPaymentStatus(Donation.PaymentStatus.PENDING);
             donation.setDonationDate(LocalDateTime.now());
@@ -101,6 +101,7 @@ public class DonationServiceImpl implements DonationService {
         }
     }
 
+    
     @Override
     @Transactional
     public void processPaymentWebhook(String payload, String stripeSignature) {
@@ -173,7 +174,7 @@ public class DonationServiceImpl implements DonationService {
 
         return donations.stream().map(donation -> {
             String donorName = null;
-            if (!donation.isAnonymous() && donation.getDonorId() != null) {
+            if (donation.getDonorId() != null) {
                 donorName = userRepository.findById(donation.getDonorId())
                         .map(User::getUsername)
                         .orElse("Unknown");
@@ -217,7 +218,7 @@ public class DonationServiceImpl implements DonationService {
                 .stream()
                 .map(donation -> {
                     String donorName = null;
-                    if (!donation.isAnonymous() && donation.getDonorId() != null) {
+                    if (donation.getDonorId() != null) {
                         donorName = userRepository.findById(donation.getDonorId())
                                 .map(User::getUsername)
                                 .orElse("Unknown");

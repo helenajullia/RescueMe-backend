@@ -28,7 +28,6 @@ public class PetController {
     public PetController(PetService petService, UserService userService) {
         this.petService = petService;
         this.userService = userService;
-
     }
 
     /**
@@ -54,7 +53,6 @@ public class PetController {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             Pet petData = objectMapper.readValue(petDataString, Pet.class);
-
 
             User shelter = userService.getUserById(shelterId);
             Pet savedPet = petService.addPet(petData, shelter, photos);

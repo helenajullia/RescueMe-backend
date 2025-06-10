@@ -85,6 +85,7 @@ public class DocumentController {
         }
     }
 
+
     /**
      * Deletes a document for the given shelter and document type
      */

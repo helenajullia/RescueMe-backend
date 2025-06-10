@@ -19,7 +19,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class PetServiceImpl implements PetService {
-
     private final PetRepository petRepository;
     private final PetPhotoService petPhotoService;
 

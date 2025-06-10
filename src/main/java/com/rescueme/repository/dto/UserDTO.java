@@ -13,7 +13,6 @@ public class UserDTO {
     private String city;
     private String shelterType;
     private String mission;
-
     private byte[] profilePicture;
     private List<PetResponseDTO> pets;
 

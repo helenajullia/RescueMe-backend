@@ -16,7 +16,7 @@ public class Donation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "donor_id")
+    @Column(name = "donor_id", nullable = false)
     private Long donorId;
 
     @Column(name = "shelter_id", nullable = false)
@@ -38,8 +38,8 @@ public class Donation {
     @Enumerated(EnumType.STRING)
     private PaymentStatus paymentStatus = PaymentStatus.PENDING;
 
-    @Column(name = "is_anonymous")
-    private boolean isAnonymous;
+//    @Column(name = "is_anonymous")
+//    private boolean isAnonymous;
 
     @Column(length = 500)
     private String message;

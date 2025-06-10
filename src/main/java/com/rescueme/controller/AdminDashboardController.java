@@ -108,7 +108,6 @@ public class AdminDashboardController {
 
         User shelter = userService.getShelterById(shelterId);
 
-        // Extract rejection reason and details
         String reason = (String) rejectionData.getOrDefault("reason", "UNSPECIFIED");
         String customReason = (String) rejectionData.get("customReason");
         String details = (String) rejectionData.get("details");

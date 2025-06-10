@@ -45,7 +45,6 @@ public class UserServiceImpl implements UserService {
         user.setRole(Role.ADOPTER);
         user.setPhoneNumber(registerRequest.getPhoneNumber());
 
-
         userRepository.save(user);
     }
 

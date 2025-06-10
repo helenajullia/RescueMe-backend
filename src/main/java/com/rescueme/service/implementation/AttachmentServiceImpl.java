@@ -63,6 +63,7 @@ public class AttachmentServiceImpl implements AttachmentService {
         return attachmentRepository.save(attachment);
     }
 
+
     @Override
     @Transactional
     public List<MessageAttachment> createAttachments(List<MultipartFile> files, Long messageId) throws IOException {
@@ -74,6 +75,8 @@ public class AttachmentServiceImpl implements AttachmentService {
 
         return attachments;
     }
+
+
 
     @Override
     @Transactional(readOnly = true)
@@ -88,6 +91,8 @@ public class AttachmentServiceImpl implements AttachmentService {
     public List<MessageAttachment> getAttachmentsForMessage(Long messageId) {
         return attachmentRepository.findByMessageId(messageId);
     }
+
+
 
     @Override
     @Transactional(readOnly = true)
