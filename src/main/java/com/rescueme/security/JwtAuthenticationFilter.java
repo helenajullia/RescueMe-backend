@@ -86,13 +86,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                 // role-specific authorities
                                 if (user.getRole() == Role.ADMIN) {
                                     authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
-//                                    System.out.println("Added ADMIN role to authorities");
                                 } else if (user.getRole() == Role.SHELTER) {
                                     authorities.add(new SimpleGrantedAuthority("ROLE_SHELTER"));
-//                                    System.out.println("Added SHELTER role to authorities");
                                 } else {
                                     authorities.add(new SimpleGrantedAuthority("ROLE_ADOPTER"));
-//                                    System.out.println("Added ADOPTER role to authorities");
                                 }
 
                                 var authToken = new UsernamePasswordAuthenticationToken(

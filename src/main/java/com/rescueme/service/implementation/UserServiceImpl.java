@@ -1,6 +1,7 @@
 package com.rescueme.service.implementation;
 
 import com.rescueme.exception.EmailAlreadyExistException;
+import com.rescueme.exception.UsernameAlreadyExistException;
 import com.rescueme.repository.PetRepository;
 import com.rescueme.repository.UserRepository;
 import com.rescueme.repository.dto.UserDTO;
@@ -38,6 +39,10 @@ public class UserServiceImpl implements UserService {
             throw new EmailAlreadyExistException("Email already exists");
         }
 
+        if (userRepository.existsByUsername(registerRequest.getUsername())) {
+            throw new UsernameAlreadyExistException("Username already exists");
+        }
+
         User user = new User();
         user.setUsername(registerRequest.getUsername());
         user.setEmail(registerRequest.getEmail());
@@ -52,6 +57,10 @@ public class UserServiceImpl implements UserService {
     public Long addShelter(ShelterRegisterRequest registerRequest) {
         if (userRepository.existsByEmail(registerRequest.getEmail())) {
             throw new EmailAlreadyExistException("Email already exists");
+        }
+
+        if (userRepository.existsByUsername(registerRequest.getUsername())) {
+            throw new UsernameAlreadyExistException("Username already exists");
         }
 
         User user = new User();
