@@ -26,21 +26,14 @@ public class DocumentController {
      * Uploads a document for the specified shelter and document type
      */
     @PostMapping("/{shelterId}/documents/{documentType}")
-    @PreAuthorize("hasRole('ROLE_SHELTER')")
+    @PreAuthorize("hasRole('ROLE_SHELTER')") //verifica inainte daca rolul utilizatorului este de adapost
     public ResponseEntity<?> uploadDocument(
-            @PathVariable Long shelterId,
-            @PathVariable String documentType,
-            @RequestParam("file") MultipartFile file) {
+            @PathVariable Long shelterId, //extrage id ul adapostului din URL
+            @PathVariable String documentType, // si tipul documentului
+            @RequestParam("file") MultipartFile file) { //primeste documentul trimis din frontend in corpul multipart/form-data
 
         try {
-            log.info("Document upload request received for shelter: {} and type: {}",
-                    shelterId, documentType);
-
             documentService.uploadDocument(shelterId, documentType, file);
-
-            log.info("Document successfully uploaded for shelter: {} and type: {}",
-                    shelterId, documentType);
-
             return ResponseEntity.ok(Collections.singletonMap("message", "Document successfully uploaded"));
         } catch (ResponseStatusException e) {
             log.warn("Error uploading document: {}", e.getReason());
@@ -58,24 +51,23 @@ public class DocumentController {
      */
     @GetMapping("/{shelterId}/documents/{documentType}")
     public ResponseEntity<byte[]> getDocument(
-            @PathVariable Long shelterId,
+            @PathVariable Long shelterId, //parametrii extrasi din URL
             @PathVariable String documentType) {
 
         try {
-            log.info("Document retrieval request received for shelter: {} and type: {}",
-                    shelterId, documentType);
 
+            // returneaza fisierul stocat sub forma de array de bytes
             byte[] document = documentService.getDocument(shelterId, documentType);
+
+            // obtine tipul fisierului gen application/pdf etc
             String contentType = documentService.getDocumentContentType(shelterId, documentType);
 
+            // si il converteste (stringul application/pdf) intr un MediaType folosit de spring
             MediaType mediaType = determineMediaType(contentType);
 
-            log.info("Document successfully delivered for shelter: {} and type: {}",
-                    shelterId, documentType);
-
-            return ResponseEntity.ok()
-                    .contentType(mediaType)
-                    .body(document);
+            return ResponseEntity.ok()  // creeaza raspunsul HTTP cu codul 200
+                    .contentType(mediaType) //tipul fisierului ca browserul sa stie cum sa l deschida
+                    .body(document); // continutul fisierului ca bytes
         } catch (ResponseStatusException e) {
             log.warn("Error retrieving the document: {}", e.getReason());
             return ResponseEntity.status(e.getStatusCode()).build();

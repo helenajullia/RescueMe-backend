@@ -48,11 +48,9 @@ public class WebSecurityConfig {
                         .requestMatchers("/api/v1/auth/reset-password").permitAll()
                         .requestMatchers("/api/v1/auth/change-password").permitAll()
 
-                        // Permite GET pe /api/v1/events
                         .requestMatchers(HttpMethod.GET, "/api/v1/events").permitAll()
                         .requestMatchers("/api/v1/events/**").authenticated()
 
-                        // Permite GET pe /pets/available
                         .requestMatchers(HttpMethod.GET, "/pets/available").permitAll()
                         .requestMatchers("/pets/**").authenticated()
 

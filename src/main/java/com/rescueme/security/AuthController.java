@@ -64,28 +64,12 @@ public class AuthController {
     }
 
     /**
-     * Logs in a user and sets JWT access and refresh tokens as secure cookies
+     * Logs in a user
      */
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request, HttpServletResponse response) {
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
         LoginResponse loginResponse = authService.login(request);
         User user = userRepository.findByEmail(request.getEmail()).orElseThrow();
-
-        Cookie accessCookie = new Cookie("accessToken", loginResponse.getToken());
-        accessCookie.setHttpOnly(true);
-        accessCookie.setSecure(false);
-        accessCookie.setPath("/");
-        accessCookie.setMaxAge(60 * 15);
-
-        Cookie refreshCookie = new Cookie("refreshToken", loginResponse.getRefreshToken());
-        refreshCookie.setHttpOnly(true);
-        refreshCookie.setSecure(false);
-        refreshCookie.setPath("/");
-        refreshCookie.setMaxAge(60 * 60 * 24 * 7);
-
-        response.addCookie(accessCookie);
-        response.addCookie(refreshCookie);
-
 
         if (user.getRole() == Role.SHELTER) {
             loginResponse.setStatus(user.getStatus().toString());
@@ -103,29 +87,23 @@ public class AuthController {
         return ResponseEntity.ok(loginResponse);
     }
 
+
     /**
-     * Logs out the user by removing access and refresh tokens from cookies and revoking the refresh token
+     * Logs out the user by removing access and refresh tokens and revoking the refresh token
      */
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response,
-                                    @CookieValue(value = "refreshToken", required = false) String refreshToken) {
+    public ResponseEntity<?> logout(@RequestBody(required = false) Map<String, String> body,
+                                    @RequestHeader(value = "Authorization", required = false) String authHeader) {
 
-        Cookie accessTokenCookie = new Cookie("accessToken", null);
-        accessTokenCookie.setHttpOnly(true);
-        accessTokenCookie.setSecure(false);
-        accessTokenCookie.setPath("/");
-        accessTokenCookie.setMaxAge(0);
+        String refreshToken = null;
 
-        Cookie refreshTokenCookie = new Cookie("refreshToken", null);
-        refreshTokenCookie.setHttpOnly(true);
-        refreshTokenCookie.setSecure(false);
-        refreshTokenCookie.setPath("/");
-        refreshTokenCookie.setMaxAge(0);
+        if (body != null && body.containsKey("refreshToken")) {
+            refreshToken = body.get("refreshToken");
+        }
 
-        response.addCookie(accessTokenCookie);
-        response.addCookie(refreshTokenCookie);
-
-        System.out.println("Refresh token from cookie: " + refreshToken);
+        if (refreshToken == null && authHeader != null && authHeader.startsWith("Bearer ")) {
+            refreshToken = authHeader.substring(7);
+        }
 
         if (refreshToken != null) {
             authService.revokeRefreshToken(refreshToken);
@@ -134,35 +112,18 @@ public class AuthController {
         return ResponseEntity.ok("Logout successful");
     }
 
+
     /**
-     * Refreshes the access token using a valid refresh token from any source
+     * Refreshes the access token using a valid refresh token
      */
     @PostMapping("/refresh-token")
     public ResponseEntity<?> refreshToken(
-            HttpServletRequest request,
-            HttpServletResponse response,
             @RequestBody(required = false) Map<String, String> body) {
 
         String refreshToken = null;
 
         if (body != null && body.containsKey("refreshToken")) {
             refreshToken = body.get("refreshToken");
-        }
-
-        if (refreshToken == null && request.getCookies() != null) {
-            for (Cookie cookie : request.getCookies()) {
-                if ("refreshToken".equals(cookie.getName())) {
-                    refreshToken = cookie.getValue();
-                    break;
-                }
-            }
-        }
-
-        if (refreshToken == null) {
-            String authHeader = request.getHeader("Authorization");
-            if (authHeader != null && authHeader.startsWith("Bearer ")) {
-                refreshToken = authHeader.substring(7);
-            }
         }
 
         if (refreshToken == null || !authService.isRefreshTokenValid(refreshToken)) {
@@ -180,19 +141,13 @@ public class AuthController {
 
         String newAccessToken = authService.generateAccessToken(user);
 
-        Cookie accessCookie = new Cookie("accessToken", newAccessToken);
-        accessCookie.setHttpOnly(true);
-        accessCookie.setSecure(false);
-        accessCookie.setPath("/");
-        accessCookie.setMaxAge(60 * 15);
-        response.addCookie(accessCookie);
-
         Map<String, Object> responseBody = new HashMap<>();
         responseBody.put("message", "Access token refreshed");
         responseBody.put("token", newAccessToken);
 
         return ResponseEntity.ok(responseBody);
     }
+
 
     @GetMapping("/test-refresh")
     public ResponseEntity<?> testRefresh() {

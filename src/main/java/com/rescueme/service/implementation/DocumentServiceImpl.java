@@ -30,69 +30,53 @@ public class DocumentServiceImpl implements DocumentService {
     @Transactional
     public void uploadDocument(Long shelterId, String documentType, MultipartFile file) {
         if (shelterId == null || !isValidDocumentType(documentType) || file == null || file.isEmpty()) {
-            log.warn("Attempt to upload with invalid parameters: shelterId={}, documentType={}, file={}",
-                    shelterId, documentType, file != null ? file.getOriginalFilename() : "null");
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Invalid parameters for document upload");
         }
 
         if (file.getSize() > MAX_FILE_SIZE) {
-            log.warn("The file size exceeds the maximum allowed: {} bytes", file.getSize());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "The file size exceeds the maximum allowed (2MB)");
         }
 
         String contentType = file.getContentType();
         if (!isValidContentType(contentType)) {
-            log.warn("Invalid file type: {}", contentType);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Invalid file type. Only PDF, JPEG, and PNG files are accepted");
         }
 
         try {
-            log.debug("Uploading document: {} for shelter: {}", documentType, shelterId);
-            log.debug("Original file name: {}", file.getOriginalFilename());
-            log.debug("Content type: {}", file.getContentType());
-            log.debug("File size: {} bytes", file.getSize());
+            byte[] fileContent = file.getBytes(); //citeste fisierul ca pe un array de bytes pt a putea fi salvat in DB
 
-
-            byte[] fileContent = file.getBytes();
-
+            //cauta in DB daca adapostul a mai incarcat deja un document de tipul asta  (taxCertificate, idCard, vetContract, vetAuthorization)
             Optional<Document> existingDoc = documentRepository.findByShelterIdAndType(shelterId, documentType);
 
             Document document;
-            if (existingDoc.isPresent()) {
-                log.debug("Updating existing document");
+            if (existingDoc.isPresent()) { //daca exista deja, nu mai seteaza campurile de specifice de creare
                 document = existingDoc.get();
-            } else {
-                log.debug("Creating new document");
+            } else { //daca nu exista deja il creeaza
                 document = new Document();
                 document.setShelterId(shelterId);
-                document.setType(documentType);
+                document.setType(documentType); // idCard etc.
                 document.setCreatedAt(LocalDateTime.now());
             }
 
-
-            document.setContent(fileContent);
-            document.setFileName(file.getOriginalFilename());
-            document.setContentType(file.getContentType());
+            document.setContent(fileContent); // continutul binar in BYTEA, tip de date specific PostgreSQL, folosit pentru a stoca date binare
+            document.setFileName(file.getOriginalFilename()); // numele fisierului
+            document.setContentType(file.getContentType()); // tipul MIME gen application/pdf etc
             document.setUpdatedAt(LocalDateTime.now());
-            document.setFileSize(file.getSize());
+            document.setFileSize(file.getSize()); //dimensiunea in octeti
 
-            Document saved = documentRepository.save(document);
-            log.debug("Document saved with ID: {}", saved.getId());
+            documentRepository.save(document);
 
         } catch (IOException e) {
-            log.error("Error reading file content: {}", e.getMessage(), e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
                     "Error processing document: " + e.getMessage());
         } catch (Exception e) {
-            log.error("Unexpected error while uploading document: {}", e.getMessage(), e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
                     "Unexpected error while processing document");
         }
     }
-
 
 
     @Override
