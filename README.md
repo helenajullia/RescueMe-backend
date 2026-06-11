@@ -38,3 +38,37 @@ Interfața va fi disponibilă la adresa `http://localhost:5173`.
 #### Configurare bazei de date
 
 Pentru ca aplicația să funcționeze complet, trebuie configurată o bază de date PostgreSQL. Este indicat să fie instalate atât PostgreSQL, cât și interfața grafică pgAdmin.
+
+### Continuous Integration (CI)
+
+Proiectul include un workflow GitHub Actions care rulează automat la fiecare push sau pull request pe branch-urile `main` și `develop`.
+
+#### Ce face workflow-ul CI:
+
+1. **Configurare mediu**: Instalează JDK 21 și configurează cache-ul Maven
+2. **Bază de date de test**: Pornește un container PostgreSQL pentru teste
+3. **Build**: Compilează proiectul cu `mvn clean install`
+4. **Teste**: Rulează toate testele unitare cu `mvn test`
+5. **Rapoarte**: Generează rapoarte de teste și code coverage (JaCoCo)
+6. **Artefacte**: Salvează rapoartele pentru inspecție ulterioară
+
+#### Vizualizare rezultate CI:
+
+- Accesați tab-ul "Actions" din repository-ul GitHub
+- Fiecare commit/PR va avea un status badge (✓ sau ✗)
+- Click pe un workflow run pentru detalii despre teste și coverage
+
+#### Rulare locală a testelor:
+
+```bash
+# Toate testele
+mvn test
+
+# Un singur test
+mvn test -Dtest=PetServiceImplTest
+
+# Cu raport de coverage
+mvn clean test jacoco:report
+```
+
+Raportul de coverage va fi disponibil în `target/site/jacoco/index.html`.
