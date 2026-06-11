@@ -1,0 +1,25 @@
+package com.rescueme.service;
+
+import com.rescueme.repository.dto.PetResponseDTO;
+import com.rescueme.repository.dto.PetStatsDTO;
+import com.rescueme.repository.entity.Pet;
+import com.rescueme.repository.entity.PetStatus;
+import com.rescueme.repository.entity.User;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
+
+public interface PetService {
+
+    List<PetResponseDTO> getAllPets();
+    Pet addPet(Pet pet, User shelter, List<MultipartFile> photos);
+    Pet getPetById(Long id);
+    Pet updatePet(Long petId, Pet updatedPetData, Long shelterId, List<MultipartFile> newPhotos, List<Long> photoIdsToDelete);
+    boolean deletePetByShelterId(Long shelterId, Long petId);
+    List<PetResponseDTO> getPetsByShelterId(Long shelterId);
+    PetStatsDTO getPetStatsByShelter(Long shelterId);
+    List<String> getAllBreeds();
+    List<String> getBreedsBySpecies(String species);
+    long countPetsByShelter(Long shelterId);
+    List<PetResponseDTO> getPetsByStatus(PetStatus status);
+}

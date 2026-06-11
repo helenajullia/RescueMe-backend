@@ -1,0 +1,292 @@
+package com.rescueme.service.implementation;
+
+import com.rescueme.exception.EmailAlreadyExistException;
+import com.rescueme.exception.UsernameAlreadyExistException;
+import com.rescueme.repository.PetRepository;
+import com.rescueme.repository.UserRepository;
+import com.rescueme.repository.dto.UserDTO;
+import com.rescueme.repository.entity.Pet;
+import com.rescueme.repository.entity.Role;
+import com.rescueme.repository.entity.ShelterStatus;
+import com.rescueme.repository.entity.User;
+import com.rescueme.security.request.AdopterRegisterRequest;
+import com.rescueme.security.request.ShelterRegisterRequest;
+import com.rescueme.service.UserService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+@Service
+@RequiredArgsConstructor
+public class UserServiceImpl implements UserService {
+
+    private final UserRepository userRepository;
+    private final PetRepository petRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    @Override
+    public void addAdopter(AdopterRegisterRequest registerRequest) {
+        if (userRepository.existsByEmail(registerRequest.getEmail())) {
+            throw new EmailAlreadyExistException("Email already exists");
+        }
+
+        if (userRepository.existsByUsername(registerRequest.getUsername())) {
+            throw new UsernameAlreadyExistException("Username already exists");
+        }
+
+        User user = new User();
+        user.setUsername(registerRequest.getUsername());
+        user.setEmail(registerRequest.getEmail());
+        user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
+        user.setRole(Role.ADOPTER);
+        user.setPhoneNumber(registerRequest.getPhoneNumber());
+
+        userRepository.save(user);
+    }
+
+    @Override
+    public Long addShelter(ShelterRegisterRequest registerRequest) {
+        if (userRepository.existsByEmail(registerRequest.getEmail())) {
+            throw new EmailAlreadyExistException("Email already exists");
+        }
+
+        if (userRepository.existsByUsername(registerRequest.getUsername())) {
+            throw new UsernameAlreadyExistException("Username already exists");
+        }
+
+        User user = new User();
+        user.setUsername(registerRequest.getUsername());
+        user.setEmail(registerRequest.getEmail());
+        user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
+        user.setRole(Role.SHELTER);
+        user.setPhoneNumber(registerRequest.getPhoneNumber());
+        user.setShelterType(registerRequest.getShelterType());
+
+        User savedUser = userRepository.save(user);
+        return savedUser.getId();
+    }
+
+
+    @Override
+    public User getUserById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
+    }
+
+    @Override
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
+    @Override
+    public void deleteUserById(Long userId) {
+        if (!userRepository.existsById(userId)) {
+            throw new RuntimeException("User not found with ID: " + userId);
+        }
+        userRepository.deleteById(userId);
+    }
+
+    @Override
+    public boolean emailExists(String email) {
+        return userRepository.existsByEmail(email);
+    }
+
+    @Override
+    public boolean usernameExists(String username) {
+        return userRepository.existsByUsername(username);
+    }
+
+    @Override
+    public User updateUser(Long userId, Map<String, Object> updates) {
+        Optional<User> optionalUser = userRepository.findById(userId);
+
+        if (optionalUser.isEmpty()) {
+            throw new RuntimeException("User not found with ID: " + userId);
+        }
+
+        User user = optionalUser.get();
+
+        updates.forEach((key, value) -> {
+            switch (key) {
+                case "username":
+                    user.setUsername((String) value);
+                    break;
+                case "email":
+                    user.setEmail((String) value);
+                    break;
+                case "phoneNumber":
+                    user.setPhoneNumber((String) value);
+                    break;
+                case "county":
+                    user.setCounty((String) value);
+                    break;
+                case "city":
+                    user.setCity((String) value);
+                    break;
+                case "shelterType":
+                    user.setShelterType((String) value);
+                    break;
+                case "mission":
+                    user.setMission((String) value);
+                    break;
+                case "fullAddress":
+                    user.setFullAddress((String) value);
+                    break;
+                case "zipCode":
+                    user.setZipCode((String) value);
+                    break;
+                case "yearFounded":
+                    if (value instanceof Integer) {
+                        user.setYearFounded((Integer) value);
+                    } else if (value instanceof String) {
+                        try {
+                            user.setYearFounded(Integer.parseInt((String) value));
+                        } catch (NumberFormatException e) {
+                            throw new IllegalArgumentException("Invalid year format: " + value);
+                        }
+                    } else if (value instanceof Number) {
+                        user.setYearFounded(((Number) value).intValue());
+                    }
+                    break;
+                case "hoursOfOperation":
+                    user.setHoursOfOperation((String) value);
+                    break;
+                case "status":
+                    if (value instanceof ShelterStatus) {
+                        user.setStatus((ShelterStatus) value);
+                        if (value == ShelterStatus.APPROVED) {
+                            user.setApprovedAt(LocalDateTime.now());
+                        }
+                    } else if (value instanceof String) {
+                        try {
+                            ShelterStatus status = ShelterStatus.valueOf((String) value);
+                            user.setStatus(status);
+                            if (status == ShelterStatus.APPROVED) {
+                                user.setApprovedAt(LocalDateTime.now());
+                            }
+                        } catch (IllegalArgumentException e) {
+                            throw new IllegalArgumentException("Invalid shelter status: " + value);
+                        }
+                    }
+                    break;
+                case "approvedAt":
+                    if (value instanceof LocalDateTime) {
+                        user.setApprovedAt((LocalDateTime) value);
+                    }
+                    break;
+                case "firstLoginAfterApproval":
+                    if (value instanceof Boolean) {
+                        user.setFirstLoginAfterApproval((Boolean) value);
+                    } else if (value instanceof String) {
+                        user.setFirstLoginAfterApproval(Boolean.valueOf((String) value));
+                    }
+                    break;
+                // Add the new fields here
+                case "rejectionReason":
+                    user.setRejectionReason((String) value);
+                    break;
+                case "rejectionDetails":
+                    user.setRejectionDetails((String) value);
+                    break;
+                case "rejectedAt":
+                    if (value instanceof LocalDateTime) {
+                        user.setRejectedAt((LocalDateTime) value);
+                    }
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown field: " + key);
+            }
+        });
+
+        return userRepository.save(user);
+    }
+
+    @Override
+    public void uploadProfilePicture(Long userId, MultipartFile file) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        try {
+            user.setProfilePicture(file.getBytes());
+            userRepository.save(user);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to upload profile picture", e);
+        }
+    }
+
+    @Override
+    public byte[] getProfilePicture(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return user.getProfilePicture();
+    }
+
+    @Override
+    public void deleteProfilePicture(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        user.setProfilePicture(null);
+        userRepository.save(user);
+    }
+
+    public void changePassword(Long userId, String currentPassword, String newPassword) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Current password is incorrect");
+        }
+
+        if (passwordEncoder.matches(newPassword, user.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "New password must be different from the current password");
+        }
+
+        if (newPassword.length() < 10 || !newPassword.matches(".*[a-z].*") || !newPassword.matches(".*[!@#?].*")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Password does not meet the required criteria");
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
+
+
+    @Override
+    public User getShelterById(Long shelterId) {
+        User shelter = userRepository.findById(shelterId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Shelter not found"));
+
+        if (!shelter.getRole().equals(Role.SHELTER)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User is not a shelter");
+        }
+
+        return shelter;
+    }
+
+    @Override
+    public List<UserDTO> getAllShelters() {
+        List<User> shelters = userRepository.findByRole(Role.SHELTER);
+        return shelters.stream().map(UserDTO::new).toList();
+    }
+
+    @Override
+    public List<UserDTO> getSheltersByStatus(ShelterStatus status) {
+        List<User> shelters = userRepository.findByRoleAndStatus(Role.SHELTER, status);
+        return shelters.stream().map(UserDTO::new).toList();
+    }
+
+    @Override
+    public List<UserDTO> getApprovedShelters() {
+        return getSheltersByStatus(ShelterStatus.APPROVED);
+    }
+}
